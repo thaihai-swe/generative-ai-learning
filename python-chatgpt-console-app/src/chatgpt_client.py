@@ -40,4 +40,11 @@ class ChatGPTClient:
             model = MODEL
         messages = [{"role": "user", "content": user_message}]
         response = self.send_message(messages, model=model)
+
+
+
         return response.choices[0].message.content
+
+
+
+
