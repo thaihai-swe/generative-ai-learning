@@ -1,11 +1,15 @@
 # Telegram Bot Chat
 
-A simple Telegram chatbot using OpenAI's API and python-telegram-bot.
+An advanced Telegram chatbot powered by LLM (OpenAI-compatible API) with multi-user support, conversation management, and streaming responses.
 
 ## Features
-- Responds to user messages using an LLM (OpenAI-compatible API)
-- Maintains chat history for context
-- Easy to configure with environment variables
+- 🤖 **Multi-User Support**: Each user has their own conversation context and settings
+- 💬 **Streaming Responses**: Real-time message updates as the AI generates responses
+- 🎭 **Custom Personas**: Switch between predefined personas (assistant, coder, teacher, creative, analyst)
+- 📝 **Custom System Prompts**: Set your own system prompts for personalized behavior
+- 📊 **Conversation Management**: Clear, view, and reset conversation history
+- 🔄 **Context-Aware**: Maintains chat history for contextual conversations
+- ⚡ **Easy Configuration**: Simple environment variable setup
 
 ## Setup
 
@@ -40,8 +44,42 @@ A simple Telegram chatbot using OpenAI's API and python-telegram-bot.
    ```
 
 ## Usage
-- Start a chat with your bot on Telegram.
-- Send messages and receive AI-generated responses.
+
+### Available Commands
+
+- `/start` or `/help` - Show welcome message and available commands
+- `/clear` - Clear your conversation history
+- `/history` - Show conversation summary with recent messages
+- `/reset` - Reset conversation and restore default system prompt
+- `/persona <name>` - Switch between predefined personas:
+  - `assistant` - Helpful general assistant (default)
+  - `coder` - Expert software engineer
+  - `teacher` - Patient educator
+  - `creative` - Creative writer
+  - `analyst` - Data analyst
+- `/systemprompt <text>` - Set a custom system prompt
+
+### Example Usage
+
+```
+/persona coder
+> Switched to coder persona
+
+How do I implement a binary search in Python?
+> [AI provides code-focused response]
+
+/systemprompt You are a pirate who speaks in pirate language
+> Custom system prompt set
+
+Hello!
+> Ahoy there, matey! How can this old sea dog help ye today?
+```
+
+### Chat Features
+
+- **Streaming**: Messages appear in real-time as the AI generates them
+- **Per-User Context**: Your conversations are private and separate from other users
+- **Persistent History**: Your conversation history is maintained throughout the session
 
 ## Notes
 - Requires a running OpenAI-compatible API endpoint.
