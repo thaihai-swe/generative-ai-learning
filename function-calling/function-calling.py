@@ -372,7 +372,48 @@ def process_tool_calls(
 
 
 def main():
-    """Main function to demonstrate function calling with stock analysis."""
+    """
+    Main function to demonstrate function calling with stock analysis.
+    Interactive mode - user enters company name, country, and analysis period.
+    """
+    print("\n" + "="*80)
+    print("📈 AI-POWERED STOCK ANALYSIS SYSTEM")
+    print("="*80)
+
+    # Prompt user for company name
+    company_name = input("\n🔍 Enter company name (e.g., Microsoft, Apple, Tesla): ").strip()
+    if not company_name:
+        print("❌ Company name cannot be empty")
+        return None
+
+    # Prompt user for country
+    country = input("🌍 Enter country (default: United States): ").strip() or "United States"
+
+    # Prompt user for analysis period
+    print("\n📊 Select analysis period:")
+    print("  1mo  - 1 Month (short-term trends)")
+    print("  3mo  - 3 Months (medium-term) ⭐ Default")
+    print("  6mo  - 6 Months")
+    print("  1y   - 1 Year")
+    print("  2y   - 2 Years (long-term)")
+
+    period = input("\nEnter period (default: 3mo): ").strip() or "3mo"
+
+    # Validate period
+    valid_periods = {"1mo", "3mo", "6mo", "1y", "2y"}
+    if period not in valid_periods:
+        print(f"❌ Invalid period. Use one of: {', '.join(valid_periods)}")
+        return None
+
+    # Build the analysis query
+    analysis_query = f"""Analyze {company_name} stock in {country}.
+I want to understand:
+1. Current stock price
+2. Price trends over the last {period}
+3. Technical indicators (moving averages, volatility, momentum)
+4. Support and resistance levels
+5. An investment recommendation based on technical analysis"""
+
     messages = [
         {
             "role": "system",
@@ -380,21 +421,19 @@ def main():
 When analyzing stocks:
 1. First, find the stock symbol using get_stock_symbol
 2. Get the current price using get_stock_price
-3. Analyze trends over the past 3 months using get_stock_trends
+3. Analyze trends for the requested period using get_stock_trends
 4. Provide comprehensive analysis with trend direction, momentum, support/resistance levels
-5. Give actionable investment recommendations based on technical analysis""",
+5. Give actionable investment recommendations based on technical analysis
+6. Format your response clearly with sections for price, trend, and recommendation""",
         },
-        {
-            "role": "user",
-            "content": "Analyze Microsoft stock in the United States. I want to understand current price, trends over the last 3 months, and get an investment recommendation."
-        },
+        {"role": "user", "content": analysis_query},
     ]
 
-    logger.info("Starting comprehensive stock analysis...")
+    logger.info(f"Starting comprehensive stock analysis for {company_name} in {country}...")
     bot_response = process_tool_calls(messages, TOOLS)
 
     print("\n" + "="*80)
-    print("STOCK ANALYSIS REPORT")
+    print(f"📊 STOCK ANALYSIS REPORT: {company_name.upper()}")
     print("="*80)
     print(bot_response)
     print("="*80 + "\n")
