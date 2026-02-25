@@ -1,0 +1,45 @@
+{
+  "conversation_id": "20260225_224515",
+  "timestamp": "2026-02-25T23:33:05.364762",
+  "evaluations": [
+    {
+      "query": "What were his career achievements?",
+      "answer": "Based on the provided sources, Cristiano Ronaldo's career achievements include:\n\n- Winning 34 trophies in his career (Source 1 - WIKIPEDIA)\n- Holding records for most goals (140) and assists (42) in the Champions League (Source 1 - WIKIPEDIA)\n- Holding records for most international appearances (226) and international goals (143) (Source 1 - WIKIPEDIA)\n- Winning five UEFA Champions Leagues and the UEFA European Championship (Source 1 - WIKIPEDIA)\n\nAdditionally, Ronaldo has received numerous individual awards and accolades, including:\n\n- Being named the world's best player by FIFA five times (Source 1 - WIKIPEDIA)\n- Receiving four European Golden Shoes (Source 1 - WIKIPEDIA)\n- Being ranked the world's highest-paid athlete by Forbes on five occasions (Source 2 - WIKIPEDIA)\n- Being named in the UEFA Ultimate Team (Source 2 - WIKIPEDIA)\n\nRonaldo has also won several awards and accolades in specific leagues, including:\n\n- La Liga Best Player: 2013\u201314\n- Serie A Footballer of the Year: 2019, 2020\n- Premier League Golden Boot: 2007\u201308\n- Pichichi Trophy: 2010\u201311, 2013\u201314, 2014\u201315\n- Capocannoniere: 2020\u201321\n- Saudi Pro League Golden Boot: 2023\u201324, 2024\u201325 (Source 3 - WIKIPEDIA)",
+      "metrics": {
+        "context_relevance": 0.9,
+        "answer_relevance": 0.9,
+        "faithfulness": 0.8,
+        "rag_score": 0.865
+      },
+      "retrieval_method": "hybrid",
+      "num_chunks_retrieved": 3,
+      "timestamp": "2026-02-25T22:50:23.619110"
+    },
+    {
+      "query": "What were his career achievements?",
+      "answer": "Based on the provided sources, Cristiano Ronaldo's career achievements include:\n\n- Winning 34 trophies in his career (Source 1 - WIKIPEDIA)\n- Holding records for most goals (140) and assists (42) in the Champions League (Source 1 - WIKIPEDIA)\n- Holding records for goals (14) and assists (8) in the European Championship (Source 1 - WIKIPEDIA)\n- Holding the record for most international appearances (226) and international goals (143) (Source 1 - WIKIPEDIA)\n- Being named the world's best player five times by FIFA (Source 1 - WIKIPEDIA)\n- Winning the UEFA Champions Leagues five times (Source 1 - WIKIPEDIA)\n- Winning the UEFA European Championship (Source 1 - WIKIPEDIA)\n- Being ranked the world's highest-paid athlete by Forbes on five occasions (Source 2 - WIKIPEDIA)\n- Being named the world's most famous athlete by ESPN from 2016 to 2019 (Source 2 - WIKIPEDIA)\n- Being included in Time's list of the 100 most influential people in the world in 2014 (Source 2 - WIKIPEDIA)\n- Holding over 1 billion total followers across social media platforms, making him the first person to achieve that feat (Source 2 - WIKIPEDIA)\n\nAdditionally, based on Source 3 - WIKIPEDIA, Cristiano Ronaldo has received numerous individual awards and accolades throughout his career, including:\n\n- La Liga Best Player: 2013\u201314\n- Serie A Footballer of the Year: 2019, 2020\n- Premier League Golden Boot: 2007\u201308\n- Pichichi Trophy: 2010\u201311, 2013\u201314, 2014\u201315\n- Capocannoniere: 2020\u201321\n- Saudi Pro League Golden Boot: 2023\u201324, 2024\u201325\n- Golden Foot: 2020\n- 21st Century Awards by Globe Soccer Awards: 2020\n- Ballon d'Or Dream Team: 2020\n- FIFA FIFPRO World 11: multiple years (2007-2019)\n- Primeira Liga Best Player of All Time Award: 2025",
+      "metrics": {
+        "context_relevance": 0.9,
+        "answer_relevance": 0.9,
+        "faithfulness": 0.9,
+        "rag_score": 0.9
+      },
+      "retrieval_method": "expansion_hybrid",
+      "num_chunks_retrieved": 3,
+      "timestamp": "2026-02-25T22:51:48.737746"
+    },
+    {
+      "query": "who is ronaldo",
+      "answer": "Based on the provided context from Wikipedia sources, Cristiano Ronaldo dos Santos Aveiro is a person born on 5 February 1985 in the S\u00e3o Pedro parish of Funchal (Source 1 - WIKIPEDIA). He has achieved several notable feats in his career, including being named in various prestigious teams and receiving special awards for his record-breaking goalscoring success.\n\nTo provide more information about who Cristiano Ronaldo is, he is a renowned athlete, specifically a football player, known for his accomplishments on the field.",
+      "metrics": {
+        "context_relevance": 0.9,
+        "answer_relevance": 0.9,
+        "faithfulness": 0.9,
+        "rag_score": 0.9
+      },
+      "retrieval_method": "hybrid",
+      "num_chunks_retrieved": 3,
+      "timestamp": "2026-02-25T23:33:05.364740"
+    }
+  ]
+}

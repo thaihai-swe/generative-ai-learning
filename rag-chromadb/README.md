@@ -145,8 +145,8 @@ python rag-chromadb.py
 ### Load Sources
 
 ```
-❓ Enter command or ask a question: load Albert Einstein
-✅ Successfully loaded 42 chunks from Albert Einstein
+❓ Enter command or ask a question: load Cristiano Ronaldo
+✅ Successfully loaded 42 chunks from Cristiano Ronaldo
    Source Type: WIKIPEDIA
    Collection: albert_einstein
 
@@ -180,7 +180,7 @@ Einstein's major contributions to physics include:
 📚 SOURCES & CONTEXT (3 chunks retrieved)
 ===============================================================================
 [1] 🌐 WIKIPEDIA
-    Source: Albert Einstein
+    Source: Cristiano Ronaldo
     Relevance Score: 95.3%
     Content Preview: Einstein was a German-born theoretical physicist...
 
@@ -202,16 +202,16 @@ Einstein's major contributions to physics include:
 ===============================================================================
 [1] 👤 USER (2026-02-13T14:25:30.123456)
     Message: What are Einstein's major contributions?
-    Sources: wikipedia (Albert Einstein), wikipedia (Albert Einstein)
+    Sources: wikipedia (Cristiano Ronaldo), wikipedia (Cristiano Ronaldo)
 
 [2] 🤖 ASSISTANT (2026-02-13T14:25:35.456789)
     Confidence: 94.2%
-    Message: Einstein's major contributions to physics include...
-    Sources: wikipedia (Albert Einstein)
+    Message: Ronaldo is known for his achievements in football including...
+    Sources: wikipedia (Cristiano Ronaldo)
 
 [3] 👤 USER (2026-02-13T14:26:10.789012)
-    Message: How did these theories change physics?
-    Sources: wikipedia (Albert Einstein)
+    Message: How did these achievements impact football?
+    Sources: wikipedia (Cristiano Ronaldo)
 ===============================================================================
 ```
 
@@ -296,6 +296,53 @@ RAGResponse
 
 ## 💡 How It Works
 
+### 0. Flow
+┌─────────────────────────────────────────────────────────────┐
+│ 1. LOAD DATA (Multi-source)                                  │
+│    ├─ Wikipedia page                                         │
+│    ├─ Web URL (BeautifulSoup scraping)                      │
+│    └─ Local file                                             │
+│    ↓ Adaptive Chunking (content-aware sizing)                │
+├─────────────────────────────────────────────────────────────┤
+│ 2. STORE IN DATABASE (ChromaDB)                              │
+│    └─ Convert to Vector Embeddings (semantic meaning)        │
+│    └─ Build BM25 index (keyword search)                      │
+├─────────────────────────────────────────────────────────────┤
+│ 3. USER ASKS QUESTION                                        │
+│    ├─ Option A: Direct Query → Hybrid Search                │
+│    ├─ Option B: Query Expansion → Multiple searches          │
+│    └─ Option C: Multi-hop → Break into steps → Synthesize   │
+├─────────────────────────────────────────────────────────────┤
+│ 4. RETRIEVE RELEVANT CHUNKS                                  │
+│    ├─ Semantic search (embeddings)        70% weight         │
+│    └─ Keyword search (BM25)               30% weight         │
+│    ↓ Track Source Attribution (where from?)                  │
+├─────────────────────────────────────────────────────────────┤
+│ 5. GENERATE ANSWER                                           │
+│    ├─ Use LLM with context                                   │
+│    ├─ Build with Conversation Memory (previous Q&A)          │
+│    └─ Calculate Confidence Score                             │
+├─────────────────────────────────────────────────────────────┤
+│ 6. EVALUATE QUALITY (RAGAS)                                  │
+│    ├─ Context Relevance: Are retrieved docs relevant?        │
+│    ├─ Answer Relevance: Does it answer the question?         │
+│    ├─ Faithfulness: Is it grounded? (Hallucination detect)   │
+│    └─ RAG Score: Overall quality (weighted average)          │
+├─────────────────────────────────────────────────────────────┤
+│ 7. PERSIST DATA (State Persistence)                          │
+│    ├─ Save conversation_history.json                         │
+│    ├─ Save evaluation_metrics.json                           │
+│    └─ Save adversarial_test_results.json                     │
+├─────────────────────────────────────────────────────────────┤
+│ 8. OBSERVABILITY (Logging & Monitoring)                      │
+│    └─ All steps tracked with emojis + metrics                │
+└─────────────────────────────────────────────────────────────┘
+
+Optional Advanced Features:
+  ✓ Adversarial Testing (deliberately break it)
+  ✓ Query Expansion (try multiple phrasings)
+  ✓ Multi-hop Reasoning (solve in steps)
+
 ### 1. Loading a Source
 
 ```
@@ -378,19 +425,19 @@ History is automatically saved to `conversation_history.json`:
       "timestamp": "2026-02-13T14:25:30.000000",
       "sources": [
         {
-          "source": "Albert Einstein",
+          "source": "Cristiano Ronaldo",
           "type": "wikipedia"
         }
       ]
     },
     {
       "role": "assistant",
-      "content": "Einstein is known for developing the theories of...",
+      "content": "Ronaldo is known for his incredible achievements in...",
       "timestamp": "2026-02-13T14:25:35.000000",
       "confidence_score": 0.942,
       "sources": [
         {
-          "source": "Albert Einstein",
+          "source": "Cristiano Ronaldo",
           "type": "wikipedia"
         }
       ]
@@ -430,7 +477,7 @@ All dependencies are listed in `requirements.txt`
 ## 🐛 Troubleshooting
 
 ### "No sources loaded" error
-→ Load a source first: `load Albert Einstein`
+→ Load a source first: `load Cristiano Ronaldo`
 
 ### Web scraping fails
 → Check internet connection, URL is valid, and server isn't blocking requests
