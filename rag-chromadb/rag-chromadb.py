@@ -42,8 +42,9 @@ OPEN_AI_API_BASE_URL = os.getenv("OPEN_AI_API_BASE_URL", "http://127.0.0.1:1234/
 OPEN_AI_MODEL = os.getenv("OPEN_AI_MODEL", "meta-llama-3.1-8b-instruct")
 MAX_TOOL_CALLS = 10
 MAX_RETRIEVED_CHUNKS = 3
-CONVERSATION_HISTORY_FILE = "./conversation_history.json"
-EVALUATION_METRICS_FILE = "./evaluation_metrics.json"
+JSON_FOLDER = "./json_data"
+CONVERSATION_HISTORY_FILE = f"{JSON_FOLDER}/conversation_history.json"
+EVALUATION_METRICS_FILE = f"{JSON_FOLDER}/evaluation_metrics.json"
 HYBRID_SEARCH_WEIGHT_SEMANTIC = 0.7  # 70% semantic, 30% keyword
 HYBRID_SEARCH_WEIGHT_KEYWORD = 0.3
 
@@ -51,7 +52,7 @@ HYBRID_SEARCH_WEIGHT_KEYWORD = 0.3
 CONFIDENCE_THRESHOLD = 0.6  # Skip retrieval if confidence < 0.6
 QUERY_EXPANSION_COUNT = 4   # Generate N query variations
 MULTI_HOP_MAX_STEPS = 3     # Max reasoning steps
-ADVERSARIAL_TEST_FILE = "./adversarial_test_results.json"
+ADVERSARIAL_TEST_FILE = f"{JSON_FOLDER}/adversarial_test_results.json"
 
 # Structured Logging
 logging.basicConfig(

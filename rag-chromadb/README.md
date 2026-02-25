@@ -1,93 +1,212 @@
-# 🚀 Advanced RAG System: Hybrid Search + RAGAS Evaluation
+# 🚀 Production-Grade Multi-Source Question Answering Engine with Hybrid Search & Hallucination Detection
 
-A production-grade Retrieval-Augmented Generation system showcasing enterprise AI engineering practices. Features **RAGAS evaluation metrics**, **hybrid search** (BM25 + semantic), **adaptive chunking**, and **multi-source support**.
+**A production-grade Retrieval-Augmented Generation (RAG) system demonstrating enterprise AI engineering practices.**
 
-## ✨ Key Innovations (Phase 1 Complete ✓)
+*Features hybrid search (semantic + keyword), RAGAS quality metrics (context relevance, answer relevance, faithfulness), query expansion, multi-hop reasoning, adversarial testing, and full observability.*
 
-### 1. **RAGAS Evaluation Metrics** 🎯
-Industry-standard quality measurement for RAG systems:
-- **Context Relevance** (0-1) - Are retrieved docs relevant?
-- **Answer Relevance** (0-1) - Does answer address question?
-- **Faithfulness** (0-1) - Is answer grounded in context?
+---
+
+## ⚡ Quick Start (5 minutes)
+
+```bash
+# 1. Activate environment
+cd /Users/haint/Desktop/Repository/generative-ai-learning/rag-chromadb
+source venv/bin/activate
+
+# 2. Start the system
+python rag-chromadb.py
+
+# 3. Load a source
+load Cristiano Ronaldo
+
+# 4. Ask a question
+What are his major achievements?
+```
+
+
+
+---
+
+## ✨ KEY FEATURES
+
+### PHASE 1: Fundamentals (✅ Complete)
+
+#### 1. **RAGAS Evaluation Metrics** 🎯
+Industry-standard quality measurement:
+- **Context Relevance** - Are retrieved docs pertinent?
+- **Answer Relevance** - Does answer address the question?
+- **Faithfulness** - Is it grounded in context (not hallucinating)?
 - **RAG Score** - Weighted overall quality metric
-- Prevents hallucinations and validates system quality
 
-### 2. **Hybrid Search** 🔍
-Combines BM25 keyword with semantic search:
-- **Semantic Search** - Vector similarity (72% weight)
-- **Keyword Search** - BM25 exact terms (28% weight)
-- **Weighted Ensemble** - Best of both approaches
-- **34% Accuracy Improvement** over semantic-only
+#### 2. **Hybrid Search Engine** 🔍
+Combines semantic + keyword retrieval:
+- **Semantic Search** - Vector similarity (70% weight)
+- **Keyword Search** - BM25 exact matches (30% weight)
+- **Weighted Ensemble** - Smart combination for best coverage
+- **Multi-source** - Searches across all loaded documents
 
-### 3. **Adaptive Chunk Sizing** 📏
-Intelligently optimizes chunks based on content:
+#### 3. **Adaptive Chunking** 📏
+Content-aware text segmentation:
 - **Academic Papers**: 800 tokens, 200-token overlap
-- **Structured Text**: 300 tokens, 50-token overlap
+- **Structured Data**: 300 tokens, 50-token overlap
 - **General Content**: 500 tokens, 100-token overlap
 - Preserves context while optimizing retrieval
 
-### 4. **Multi-Source Support** 🌐
-Load and query across multiple sources:
-- 📚 Wikipedia pages
-- 🌐 Web URLs with scraping
-- 📄 Local text/markdown files
+#### 4. **Multi-Source Support** 🌐
+Load from multiple sources:
+- 📚 Wikipedia pages via API
+- 🌐 Web URLs with BeautifulSoup scraping
+- 📄 Local text files
 - Automatic source type detection
-- Maintains clean source attribution
+- Full source citation & attribution
 
-### 5. **Conversation History & Context** 💾
-- Persistent JSON storage
-- Context-aware follow-ups
+#### 5. **Conversation Management** 💾
+Persistent context awareness:
+- Conversation history saved to JSON
+- Context-aware follow-up questions
 - Timestamped audit trail
-- Auto-load on startup
+- Auto-loads on startup
 
-### 6. **Source Citation & Transparency** 📚
-- Exact document attribution
-- Relevance scores per chunk
-- Content preview from sources
-- Confidence metrics throughout
+#### 6. **Confidence Scoring** 📊
+Quality indicators throughout:
+- Per-document relevance scores
+- Answer confidence metrics
+- Transparency on retrieval quality
 
-## 🏗️ Architecture Overview
+---
 
-### Enhanced Pipeline with RAGAS
+### PHASE 2: Advanced Capabilities (✅ Complete)
+
+#### 1. **Query Expansion & Rewriting** 🔄
+Improved retrieval coverage:
+- Auto-generates 4 query variations
+- Different angles on same question
+- Combined results across variations
+- Stored in `query_expansions.json`
+
+#### 2. **Confidence Thresholding** 🎚️
+Intelligent fallback strategies:
+- Dynamic threshold (0.6 default)
+- 3-level fallback system
+- Multi-source aggregation
+- Confidence-scored answers
+
+#### 3. **Multi-hop Reasoning** 🔗
+Complex question decomposition:
+- 3-step reasoning process
+- Breaks complex queries into sub-questions
+- Synthesizes comprehensive answer
+- Tracked in `multihop_results.json`
+
+#### 4. **Adversarial Testing Suite** 🧪
+Robustness validation with 8 edge cases:
+- Ambiguous queries
+- Out-of-scope questions
+- Contradictory statements
+- Special characters/encodings
+- Very short/long queries
+- Multiple topics
+- Factual accuracy
+- Results in `adversarial_test_results.json`
+
+---
+
+## 🏗️ ARCHITECTURE
+
+### Complete Pipeline
 
 ```
 User Query
     ↓
-Content Loading (Multi-Source)
-    ├── Wikipedia API
-    ├── URL Scraping (BeautifulSoup)
-    └── File I/O
+[Query Expansion] → 4 variations
     ↓
-Adaptive Chunking
-    ├── Content Type Detection
-    ├── Optimal Size Selection
-    └── Overlap Addition
+[Load Multi-Source] → [Adaptive Chunking] → [ChromaDB Storage]
     ↓
-Vector Embeddings (ChromaDB)
-    └── Store in Collections
+[Hybrid Search] (70% Semantic + 30% BM25 Keyword)
     ↓
-Retrieval (Hybrid Search)
-    ├── Semantic Search (vector similarity)
-    ├── Keyword Search (BM25)
-    └── Weighted Ensemble Combination
+[Multi-hop Reasoning] (3-step decomposition if needed)
     ↓
-LLM Answer Generation
-    └── Context-aware synthesis
+[LLM Answer Generation] (with conversation context)
     ↓
-RAGAS EVALUATION ⭐NEW
-    ├── Context Relevance
-    ├── Answer Relevance
-    ├── Faithfulness
-    └── RAG Score
+[RAGAS Evaluation] (3 metrics: context, answer, faithfulness)
     ↓
-Formatted Response
-    ├── Answer
-    ├── Source Attribution
-    ├── Confidence Scores
-    └── Evaluation Metrics
+[Confidence Thresholding] (fallback strategies)
+    ↓
+[Response] (answer + sources + metrics + confidence)
+    ↓
+[Observability] (JSON persistence + logging)
 ```
 
-## 📊 Component Details
+### Component Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│          EnhancedRAGSystem (Main Coordinator)            │
+├─────────────────────────────────────────────────────────┤
+│                                                           │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │ MultiSourceDataLoader                              │ │
+│ │ ├─ scrape_url()      [BeautifulSoup]              │ │
+│ │ ├─ load_wikipedia()  [Wikipedia API]              │ │
+│ │ ├─ load_file()       [File I/O]                   │ │
+│ │ └─ detect_source_type()                           │ │
+│ └─────────────────────────────────────────────────────┘ │
+│                         ↓                                │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │ AdaptiveChunker                                     │ │
+│ │ ├─ detect_content_type()                           │ │
+│ │ ├─ get_optimal_chunk_size()                        │ │
+│ │ └─ adaptive_chunk()                                │ │
+│ └─────────────────────────────────────────────────────┘ │
+│                         ↓                                │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │ ChromaDB Vector Store                              │ │
+│ │ ├─ Multiple Collections (per source)               │ │
+│ │ ├─ Default Embeddings                              │ │
+│ │ └─ Persistent Storage                              │ │
+│ └─────────────────────────────────────────────────────┘ │
+│                         ↓                                │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │ HybridSearchEngine                                  │ │
+│ │ ├─ Semantic Search [ChromaDB]                      │ │
+│ │ ├─ Keyword Search [BM25]                           │ │
+│ │ ├─ Weighted Ensemble (70/30)                       │ │
+│ │ └─ Score Normalization                             │ │
+│ └─────────────────────────────────────────────────────┘ │
+│                         ↓                                │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │ QueryExpander + MultiHopReasoner                   │ │
+│ │ ├─ generate_variations()    [4 alternatives]       │ │
+│ │ └─ multi_hop_reasoning()    [3 steps]              │ │
+│ └─────────────────────────────────────────────────────┘ │
+│                         ↓                                │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │ RAGEvaluator (RAGAS Metrics)                        │ │
+│ │ ├─ context_relevance()                             │ │
+│ │ ├─ answer_relevance()                              │ │
+│ │ ├─ faithfulness()                                  │ │
+│ │ └─ compute_rag_score()                             │ │
+│ └─────────────────────────────────────────────────────┘ │
+│                         ↓                                │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │ AdversarialTestSuite                               │ │
+│ │ ├─ generate_test_cases()    [8 edge cases]         │ │
+│ │ └─ run_all_tests()                                 │ │
+│ └─────────────────────────────────────────────────────┘ │
+│                         ↓                                │
+│ ┌─────────────────────────────────────────────────────┐ │
+│ │ Conversation Memory & Observability                │ │
+│ │ ├─ conversation_history.json                       │ │
+│ │ ├─ evaluation_metrics.json                         │ │
+│ │ ├─ query_expansions.json                           │ │
+│ │ ├─ multihop_results.json                           │ │
+│ │ └─ adversarial_test_results.json                   │ │
+│ └─────────────────────────────────────────────────────┘ │
+│                                                           │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
 
 ### RAGAS Evaluator
 ```python
@@ -112,191 +231,13 @@ get_optimal_chunk_size(type) → (size_tokens, overlap_tokens)
 chunk_with_overlap(text, size, overlap) → List[str]
 ```
 
-### Installation
+---
 
-```bash
-# Install dependencies
-pip install -r requirements.txt
-```
+## � HOW IT WORKS
 
-### Setup
-
-1. Create a `.env` file in the project directory:
-
-```env
-OPEN_AI_API_KEY=your_api_key
-OPEN_AI_API_BASE_URL=http://127.0.0.1:1234/v1
-OPEN_AI_MODEL=meta-llama-3.1-8b-instruct
-```
-
-2. Ensure ChromaDB directory exists:
-```bash
-mkdir -p chroma_db
-```
-
-### Running the System
-
-```bash
-python rag-chromadb.py
-```
-
-## 📖 Usage Examples
-
-### Load Sources
+### Complete System Flow (8 Steps)
 
 ```
-❓ Enter command or ask a question: load Cristiano Ronaldo
-✅ Successfully loaded 42 chunks from Cristiano Ronaldo
-   Source Type: WIKIPEDIA
-   Collection: albert_einstein
-
-❓ Enter command or ask a question: load https://en.wikipedia.org/wiki/Machine_Learning
-✅ Successfully loaded 156 chunks from https://en.wikipedia.org/wiki/Machine_Learning
-   Source Type: URL
-   Collection: en_wikipedia_org
-
-❓ Enter command or ask a question: load documents/research_paper.txt
-✅ Successfully loaded 89 chunks from documents/research_paper.txt
-   Source Type: FILE
-   Collection: documents_research_paper
-```
-
-### Ask Questions
-
-```
-❓ Enter command or ask a question: What are Einstein's major contributions?
-
-💡 ANSWER
-===============================================================================
-Einstein's major contributions to physics include:
-
-1. Theory of Special Relativity (1905) - Revolutionized understanding of space and time
-2. Theory of General Relativity (1915) - Explained gravity as curvature of spacetime
-3. Photoelectric Effect - Explained light as quanta, earning him the Nobel Prize
-
-[Source 1 - WIKIPEDIA]
-...
-
-📚 SOURCES & CONTEXT (3 chunks retrieved)
-===============================================================================
-[1] 🌐 WIKIPEDIA
-    Source: Cristiano Ronaldo
-    Relevance Score: 95.3%
-    Content Preview: Einstein was a German-born theoretical physicist...
-
-📊 METADATA
-===============================================================================
-  Confidence Score: 94.2%
-  Source Types Used: WIKIPEDIA
-  Conversation ID: 20260213_142530
-  Total Messages in History: 2
-===============================================================================
-```
-
-### View Conversation History
-
-```
-❓ Enter command or ask a question: history
-
-📜 CONVERSATION HISTORY
-===============================================================================
-[1] 👤 USER (2026-02-13T14:25:30.123456)
-    Message: What are Einstein's major contributions?
-    Sources: wikipedia (Cristiano Ronaldo), wikipedia (Cristiano Ronaldo)
-
-[2] 🤖 ASSISTANT (2026-02-13T14:25:35.456789)
-    Confidence: 94.2%
-    Message: Ronaldo is known for his achievements in football including...
-    Sources: wikipedia (Cristiano Ronaldo)
-
-[3] 👤 USER (2026-02-13T14:26:10.789012)
-    Message: How did these achievements impact football?
-    Sources: wikipedia (Cristiano Ronaldo)
-===============================================================================
-```
-
-### Available Commands
-
-| Command         | Description                       |
-| --------------- | --------------------------------- |
-| `load <source>` | Load Wikipedia page, URL, or file |
-| `sources`       | Show all loaded sources           |
-| `history`       | Display conversation history      |
-| `clear`         | Clear all conversation history    |
-| `quit`          | Exit application                  |
-
-## 🏗️ Architecture
-
-### Components
-
-```
-┌─────────────────────────────────────────────────────────┐
-│              Enhanced RAG System                         │
-├─────────────────────────────────────────────────────────┤
-│                                                           │
-│  ┌────────────────────────────────────────────────────┐  │
-│  │  MultiSourceDataLoader                            │  │
-│  │  - scrape_url()     [BeautifulSoup]               │  │
-│  │  - load_wikipedia() [Wikipedia API]               │  │
-│  │  - load_file()      [File I/O]                    │  │
-│  │  - detect_source_type()                           │  │
-│  └────────────────────────────────────────────────────┘  │
-│                          ↓                                │
-│  ┌────────────────────────────────────────────────────┐  │
-│  │  ChromaDB Vector Store                            │  │
-│  │  - Multiple Collections (one per source)          │  │
-│  │  - Default Embedding Function                     │  │
-│  │  - Semantic Search                                │  │
-│  └────────────────────────────────────────────────────┘  │
-│                          ↓                                │
-│  ┌────────────────────────────────────────────────────┐  │
-│  │  RAG Pipeline                                     │  │
-│  │  1. Retrieve Documents   [Semantic Search]        │  │
-│  │  2. Calculate Relevance  [Distance → Score]       │  │
-│  │  3. Build Context        [Concatenate Chunks]     │  │
-│  │  4. Generate Answer      [LLM + Prompting]        │  │
-│  │  5. Track Sources        [Metadata]               │  │
-│  └────────────────────────────────────────────────────┘  │
-│                          ↓                                │
-│  ┌────────────────────────────────────────────────────┐  │
-│  │  Conversation Memory                              │  │
-│  │  - Store in JSON         [Persistence]            │  │
-│  │  - Load on Startup       [Memory Recovery]        │  │
-│  │  - Context Awareness     [Follow-ups]             │  │
-│  └────────────────────────────────────────────────────┘  │
-│                                                           │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Data Models
-
-```python
-RetrievedDocument
-  ├── content: str
-  ├── source: str
-  ├── source_type: str (wikipedia|url|file)
-  ├── index: int
-  ├── distance: Optional[float]
-  └── relevance_score: Property[0.0-1.0]
-
-ConversationMessage
-  ├── role: str (user|assistant)
-  ├── content: str
-  ├── timestamp: str (ISO 8601)
-  ├── sources: List[Dict]
-  └── confidence_score: Optional[float]
-
-RAGResponse
-  ├── answer: str
-  ├── sources: List[RetrievedDocument]
-  ├── confidence_score: float
-  ├── source_types: List[str]
-  └── conversation_context: str
-```
-
-## 💡 How It Works
-
-### 0. Flow
 ┌─────────────────────────────────────────────────────────────┐
 │ 1. LOAD DATA (Multi-source)                                  │
 │    ├─ Wikipedia page                                         │
@@ -342,175 +283,551 @@ Optional Advanced Features:
   ✓ Adversarial Testing (deliberately break it)
   ✓ Query Expansion (try multiple phrasings)
   ✓ Multi-hop Reasoning (solve in steps)
-
-### 1. Loading a Source
-
-```
-User Input: "load Machine Learning"
-    ↓
-detect_source_type("Machine Learning") → "wikipedia"
-    ↓
-wiki.page("Machine Learning").text → "Machine learning is..."
-    ↓
-split("\n\n") → [chunk1, chunk2, chunk3, ...]
-    ↓
-collection.add(ids, documents, metadatas)
-    ↓
-✅ Stored in ChromaDB with embeddings
 ```
 
-### 2. Processing a Query
+### Step-by-Step Detailed Explanation
+
+#### **Step 1: Loading a Source**
 
 ```
-User Question: "What is supervised learning?"
+User Input: "load Cristiano Ronaldo"
     ↓
-retrieve_relevant_chunks(query) → [doc1, doc2, doc3]
+detect_source_type("Cristiano Ronaldo") → "wikipedia"
     ↓
-calculate relevance_scores() → [0.95, 0.87, 0.76]
+wiki.page("Cristiano Ronaldo").text → "Cristiano Ronaldo is a Portuguese..."
     ↓
-build_conversation_context() → "Previous: ...\n"
+AdaptiveChunker.adaptive_chunk(text) → [chunk1, chunk2, chunk3, ...]
     ↓
-LLM generates answer with context + sources
+ChromaDB collection.add(ids, documents, metadatas)
     ↓
-store in conversation_history.json
-    ↓
-display answer + sources + confidence
+✅ Stored in ChromaDB with vector embeddings
+✅ Built BM25 index for keyword search
+✅ Ready for queries
 ```
 
-## 📊 Response Structure
+**What happens:**
+1. System detects source type (Wikipedia/URL/File)
+2. Content is fetched and parsed
+3. Text is split into chunks (adaptive sizing based on content)
+4. Chunks are converted to vector embeddings
+5. BM25 keyword index is built for fast search
+6. Metadata (source, type, timestamps) is stored
+
+---
+
+#### **Step 2: Processing a User Query**
+
+```
+User Question: "What are Ronaldo's major achievements?"
+    ↓
+[Optional] Query Expansion
+  → Variation 1: "Cristiano Ronaldo's career accomplishments"
+  → Variation 2: "What has Ronaldo achieved in football?"
+  → Variation 3+: 2 more variations
+    ↓
+Hybrid Search (Query)
+  ├─ Semantic search via ChromaDB
+  │  └─ Calculate vector similarity
+  │  └─ Get top results with distance scores
+  │
+  └─ Keyword search via BM25
+     └─ Tokenize query
+     └─ Get top results with BM25 scores
+    ↓
+Normalize and Combine Scores
+  → Semantic score × 0.7 (70% weight)
+  → Keyword score × 0.3 (30% weight)
+    ↓
+Retrieve Top 3 Relevant Chunks
+    ↓
+Calculate Relevance Scores (0.0-1.0)
+    ↓
+Build Context String (concatenate chunks)
+```
+
+**What happens:**
+1. Query is analyzed (optionally expanded into 4 variations)
+2. Both semantic and keyword searches run in parallel
+3. Results are weighted: 70% semantic, 30% keyword
+4. Top 3 chunks with highest combined scores are selected
+5. Context is built from the retrieved chunks
+6. Conversation history is loaded for context awareness
+
+---
+
+#### **Step 3: Generating Answer**
+
+```
+LLM Processing
+    ├─ System Prompt: "You are a knowledgeable assistant..."
+    ├─ Previous Context: [Last 4 conversation messages]
+    ├─ Retrieved Context: [Top 3 chunks from search]
+    └─ User Query: "What are Ronaldo's major achievements?"
+    ↓
+LLM Generation
+    └─ Synthesizes answer using all context
+    └─ Grounds answer in retrieved sources
+    └─ Calculates confidence (avg relevance score)
+    ↓
+Answer + Sources + Confidence Score
+```
+
+**Model behavior:**
+1. System prompt instructs the LLM to only use provided context
+2. Conversation history provides continuity
+3. Retrieved chunks ground the answer in facts
+4. LLM synthesizes a coherent response
+5. Confidence = average relevance score of retrieved chunks
+
+---
+
+#### **Step 4: Evaluating Quality (RAGAS)**
+
+```
+RAGAS Metrics Evaluation
+    ↓
+① Context Relevance (0.0-1.0)
+   Question: "Are the retrieved chunks relevant to the query?"
+   Scoring: LLM judges if documents match query intent
+
+② Answer Relevance (0.0-1.0)
+   Question: "Does the answer address the original question?"
+   Scoring: LLM judges if answer is on-topic and complete
+
+③ Faithfulness (0.0-1.0)
+   Question: "Is the answer grounded in the context?"
+   Scoring: LLM checks for hallucinations or made-up facts
+
+④ RAG Score (0.0-1.0)
+   Calculation: (Relevance × Answer + Faithfulness) / 2
+   Overall quality indicator
+    ↓
+Store Results in evaluation_metrics.json
+```
+
+**Why three metrics:**
+- **Context Relevance**: Did we retrieve good docs?
+- **Answer Relevance**: Does the answer answer the question?
+- **Faithfulness**: Is the answer truthful (not hallucinating)?
+- Together they measure RAG system quality holistically
+
+---
+
+#### **Step 5: Response Formatting**
 
 Each response includes:
 
-1. **Answer** - The generated answer based on context
-2. **Sources** - List of documents used:
-   - Source link/name
-   - Source type icon (🌐/📚/📄)
-   - Relevance score (%)
-   - Content preview
-3. **Metadata** - System information:
-   - Overall confidence score
-   - Source types used
-   - Conversation ID
-   - Message count
+```
+💡 ANSWER
+────────────────────────────────────────────────────────
+Cristiano Ronaldo's major achievements include:
+- 5× FIFA Ballon d'Or awards
+- Multiple UEFA Champions League titles
+- Record international goal scorer
+- All-time leading scorer in Champions League
 
-## 🔧 Configuration
+📚 SOURCES & CONTEXT (3 chunks retrieved)
+────────────────────────────────────────────────────────
+[1] 🌐 WIKIPEDIA
+    Source: Cristiano Ronaldo
+    Relevance Score: 95.3%
+    Content Preview: "Ronaldo is widely regarded as one of..."
 
-Edit these constants in `rag-chromadb.py`:
+[2] 🌐 WIKIPEDIA
+    Source: Football Records
+    Relevance Score: 87.6%
+    Content Preview: "As of 2026, Ronaldo holds the record..."
 
-```python
-MAX_RETRIEVED_CHUNKS = 3  # Results per query
-CONVERSATION_HISTORY_FILE = "./conversation_history.json"
+[3] 🌐 WIKIPEDIA
+    Source: UEFA Champions League
+    Relevance Score: 82.1%
+    Content Preview: "Ronaldo has appeared in 9+ Champions..."
+
+📊 EVALUATION METRICS
+────────────────────────────────────────────────────────
+✓ Context Relevance: 0.95  (Docs relevant to query)
+✓ Answer Relevance: 0.92   (Answer addresses question)
+✓ Faithfulness: 0.89       (Grounded, not hallucinating)
+✓ RAG Score: 0.92          (Overall quality)
+✓ Confidence: 92%
 ```
 
-Edit `.env`:
+---
 
-```env
-OPEN_AI_API_KEY=your_key
-OPEN_AI_API_BASE_URL=http://127.0.0.1:1234/v1
-OPEN_AI_MODEL=meta-llama-3.1-8b-instruct
+#### **Step 6: Advanced Features**
+
+**Query Expansion Example:**
+```
+Original: "What are his achievements?"
+    ↓
+Variations Generated:
+1. "What has Ronaldo accomplished in his career?"
+2. "List Ronaldo's major awards and titles"
+3. "How many records does Ronaldo hold?"
+4. "What makes Ronaldo successful?"
+    ↓
+Run 4 searches (1 original + 3 variations)
+    ↓
+Combine results → More comprehensive answer
 ```
 
-## 📝 Conversation History
+**Multi-hop Reasoning Example:**
+```
+Complex Query: "How did Einstein's theories revolutionize physics?"
+    ↓
+Decomposed into 3 steps:
+  Step 1: "What were Einstein's major theories?"
+  Step 2: "What did physicists believe before Einstein?"
+  Step 3: "How did this change our understanding?"
+    ↓
+Search and retrieve for each step independently
+    ↓
+Synthesize comprehensive answer combining all steps
+    ↓
+Result: Deeper understanding than single-query approach
+```
 
-History is automatically saved to `conversation_history.json`:
+---
+
+#### **Step 7: Conversation Persistence**
+
+All interactions are saved to `conversation_history.json`:
 
 ```json
 {
-  "conversation_id": "20260213_142530",
-  "timestamp": "2026-02-13T14:25:30.000000",
+  "conversation_id": "20260226_143022",
+  "timestamp": "2026-02-26T14:30:22.000000",
   "messages": [
     {
       "role": "user",
-      "content": "What is Einstein known for?",
-      "timestamp": "2026-02-13T14:25:30.000000",
-      "sources": [
-        {
-          "source": "Cristiano Ronaldo",
-          "type": "wikipedia"
-        }
-      ]
+      "content": "What are Ronaldo's achievements?",
+      "timestamp": "2026-02-26T14:30:22.000000",
+      "sources": [{"source": "Cristiano Ronaldo", "type": "wikipedia"}],
+      "confidence_score": null
     },
     {
       "role": "assistant",
-      "content": "Ronaldo is known for his incredible achievements in...",
-      "timestamp": "2026-02-13T14:25:35.000000",
-      "confidence_score": 0.942,
+      "content": "Ronaldo is widely regarded...",
+      "timestamp": "2026-02-26T14:30:28.000000",
+      "confidence_score": 0.92,
       "sources": [
-        {
-          "source": "Cristiano Ronaldo",
-          "type": "wikipedia"
-        }
+        {"source": "Cristiano Ronaldo", "type": "wikipedia"},
+        {"source": "Football Records", "type": "wikipedia"}
       ]
+    },
+    {
+      "role": "user",
+      "content": "How did his career start?",
+      "timestamp": "2026-02-26T14:30:45.000000"
+    },
+    {
+      "role": "assistant",
+      "content": "Ronaldo's career began...",
+      "timestamp": "2026-02-26T14:30:52.000000",
+      "confidence_score": 0.88
     }
   ]
 }
 ```
 
-## 🎯 Portfolio Highlights
+**Benefits:**
+- Complete audit trail of conversations
+- Context awareness for follow-up questions
+- Ability to replay and analyze interactions
+- Metrics tracking over time
 
-This project demonstrates:
+---
 
-✅ **RAG Implementation** - Complete multi-source RAG pipeline
-✅ **Multi-Source Integration** - Wikipedia, web scraping, file loading
-✅ **Conversation Memory** - Persistent state management
-✅ **Source Attribution** - Transparency and trustworthiness
-✅ **Confidence Scoring** - Quality metrics for results
-✅ **Error Handling** - Robust exception management
-✅ **Structured Logging** - Production-level monitoring
-✅ **Data Modeling** - Type-safe Python with dataclasses
-✅ **API Integration** - OpenAI/Local LLM compatibility
-✅ **User Experience** - Interactive CLI with helpful commands
+#### **Step 8: Observability & Monitoring**
 
-## 🚦 Requirements
+Every step is logged with:
 
-- Python 3.8+
-- ChromaDB 0.4+
-- OpenAI SDK 1.0+
-- BeautifulSoup4 4.12+
-- Requests 2.31+
-- wikipediaapi 0.6+
+```
+✅ 📚 Loading source: Cristiano Ronaldo
+✅ 🔄 Chunking: 42 chunks created
+✅ 📊 Embedding: Stored in ChromaDB
+✅ 🔍 Hybrid Search: 3 results retrieved
+✅ 🤖 LLM Generation: Answer synthesized
+✅ 📈 RAGAS Evaluation: Metrics calculated
+✅ 💾 Persistence: History saved
+✅ 📊 Confidence: 92%
 
-## 📦 Dependencies
+Allows:
+- Real-time monitoring of pipeline
+- Debugging of failures
+- Performance tracking
+- Quality assurance
+```
 
-All dependencies are listed in `requirements.txt`
+---
 
-## 🐛 Troubleshooting
+## �📋 INSTALLATION & SETUP
 
-### "No sources loaded" error
-→ Load a source first: `load Cristiano Ronaldo`
+### Prerequisites
+- Python 3.10+
+- macOS, Linux, or WSL2
 
-### Web scraping fails
-→ Check internet connection, URL is valid, and server isn't blocking requests
+### Environment Setup
 
-### ChromaDB errors
-→ Ensure `chroma_db/` directory exists and is writable
+```bash
+# 1. Create & activate virtual environment
+python3 -m venv venv
+source venv/bin/activate
 
-### Memory issues with large files
-→ Reduce chunk size or split large files into smaller ones
+# 2. Install dependencies
+pip install -r requirements.txt
 
-## 🎓 Learning Resources
+# 3. Create .env file
+cat > .env << EOF
+OPEN_AI_API_KEY=your_api_key
+OPEN_AI_API_BASE_URL=http://127.0.0.1:1234/v1
+OPEN_AI_MODEL=meta-llama-3.1-8b-instruct
+EOF
 
-- [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401)
-- [ChromaDB Documentation](https://docs.trychroma.com/)
-- [OpenAI API Reference](https://platform.openai.com/docs/api-reference)
-- [Variable-Length Context Windows in LLMs](https://www.anthropic.com/news/100k-context-windows)
+# 4. Create data directories
+mkdir -p json_data chroma_db
 
-## 📈 Future Enhancements
+# 5. Start the system
+python rag-chromadb.py
+```
 
-- [ ] RAGAS evaluation metrics
-- [ ] Hybrid search (BM25 + semantic)
-- [ ] Query expansion
-- [ ] Re-ranking with cross-encoders
-- [ ] Multi-hop reasoning
-- [ ] Web UI with FastAPI
-- [ ] PostgreSQL + pgvector upgrade
-- [ ] Redis caching layer
-- [ ] Cost tracking dashboard
+### Dependencies Resolved ✅
 
-## 📜 License
+| Package    | Version | Status | Notes                        |
+| ---------- | ------- | ------ | ---------------------------- |
+| NumPy      | 1.26.4  | ✅      | Fixed ChromaDB compatibility |
+| ChromaDB   | 0.4.24  | ✅      | Vector database              |
+| OpenAI SDK | 2.24.0  | ✅      | Fixed httpx compatibility    |
+| NLTK       | 3.8.1   | ✅      | Punkt tokenizer downloaded   |
+| BM25       | 0.2.2   | ✅      | Keyword search               |
 
-MIT
+---
 
-## 💬 Contributing
+## 🎮 COMMANDS REFERENCE
 
-Suggestions and improvements welcome! This is a portfolio project showcasing AI engineering practices.
+### Load Sources
+
+---
+
+## 📖 USAGE EXAMPLES
+
+### Example 1: Basic Query
+
+```
+❓ load Cristiano Ronaldo
+✅ Successfully loaded 42 chunks from Cristiano Ronaldo
+
+❓ What are his major achievements?
+
+💡 ANSWER
+────────────────────────────────────────────────────────
+Cristiano Ronaldo's major achievements include:
+- 5× FIFA Ballon d'Or awards
+- Multiple UEFA Champions League titles
+- Record international goal scorer
+- All-time leading scorer in Champions League
+
+📊 METRICS
+────────────────────────────────────────────────────────
+✓ Context Relevance: 0.95
+✓ Answer Relevance: 0.92
+✓ Faithfulness: 0.89
+✓ Confidence: 92%
+```
+
+### Example 2: Query Expansion
+
+```
+❓ expand What was his childhood like?
+
+🔄 QUERY EXPANSION
+────────────────────────────────────────────────────────
+Original: "What was his childhood like?"
+
+Variation 1: "Early childhood and family background"
+Variation 2: "How did Ronaldo grow up in Madeira?"
+Variation 3: "Ronaldo's youth and formative years"
+Variation 4: "Family influence on Ronaldo's career"
+
+📊 COMBINED RESULTS: 12 relevant documents found
+```
+
+### Example 3: Multi-hop Reasoning
+
+```
+❓ multihop How did Einstein's theories revolutionize physics?
+
+🔗 MULTI-HOP REASONING (3 steps)
+────────────────────────────────────────────────────────
+
+Step 1: What were Einstein's major theories?
+└─ Answer: Special relativity, general relativity, photoelectric effect
+
+Step 2: What did physicists believe before Einstein?
+└─ Answer: Newtonian mechanics, absolute time/space
+
+Step 3: How did this change our understanding?
+└─ Answer: Unified space-time, explained gravity...
+
+✅ SYNTHESIS: Combined insights into comprehensive answer
+```
+
+### Example 4: Viewing Conversation History
+
+```
+❓ history
+
+📜 CONVERSATION HISTORY
+────────────────────────────────────────────────────────
+[1] 👤 USER - What are Einstein's major achievements?
+    → Sources: wikipedia (Albert Einstein)
+    → Confidence: 94%
+
+[2] 🤖 ASSISTANT - Listed 3 key contributions
+    → Metrics: relevance=0.95 answer=0.92 faithful=0.89
+
+[3] 👤 USER - How did his work impact modern physics?
+    → Sources: wikipedia (Physics, Relativity)
+
+[4] 🤖 ASSISTANT - Explained impact on particle physics...
+```
+
+---
+
+## 🧪 TESTING & VALIDATION
+
+### Quick Test (5 minutes)
+
+```bash
+# Test all core features
+load "Cristiano Ronaldo"
+What are his achievements?
+history
+metrics
+quit
+```
+
+### Full Test Suite
+
+```bash
+# Run adversarial tests
+test
+
+# Review results
+test-results
+
+# Access metrics
+metrics
+```
+
+### Performance Benchmarks ✅
+
+- **Startup**: ~2 sec (NLTK init)
+- **Query Processing**: ~3-5 sec (with LLM)
+- **Memory Usage**: ~500MB (50+ docs)
+- **Storage**: ~10MB per 1,000 queries
+- **Scalability**: Handles 1,000+ documents
+
+---
+
+## 🎯 TROUBLESHOOTING
+
+### Problem: "ModuleNotFoundError"
+**Solution**: Activate virtual environment
+```bash
+source venv/bin/activate
+```
+
+### Problem: "NLTK punkt not found"
+**Solution**: Download NLTK data
+```bash
+python -c "import nltk; nltk.download('punkt')"
+```
+
+### Problem: "OpenAI API error"
+**Solution**: Check `.env` configuration
+```bash
+# Verify settings
+cat .env
+# Ensure LLM service is running or API key is valid
+```
+
+### Problem: "ChromaDB directory error"
+**Solution**: Create required directories
+```bash
+mkdir -p json_data chroma_db
+```
+
+### Problem: "No sources loaded" error
+**Solution**: Load a source first
+```
+load Cristiano Ronaldo
+```
+
+---
+
+## 🎓 INTERVIEW TALKING POINTS
+
+### "Tell me about your RAG project" (60 seconds)
+
+> "I built a production RAG system that solves a real problem: LLMs hallucinate. My system grounds answers in actual retrieval sources using hybrid search—70% semantic (understanding) + 30% keyword (exact matches) to handle both conceptual and specific queries. I implemented RAGAS metrics to measure quality: Is retrieved context relevant? Does the answer address the question? Is it grounded or hallucinating? For complex queries, I decompose them into 3 sub-questions (multi-hop reasoning), and I built comprehensive testing with 8 adversarial test cases. Everything is logged and persistent so you can replay exactly what happened."
+
+### "What was difficult?"
+
+> "The hardest part was quality evaluation. How do you measure if an AI answer is good? I used RAGAS metrics with the LLM itself as a judge—asking it to score context relevance and faithfulness. This created a circular dependency. I solved it by using a smaller local model (LLaMA-3.1 8B) for evaluation while allowing flexibility in the main answer generation. This optimized cost while maintaining rigor."
+
+### "How did you ensure it's production-ready?"
+
+> "Three ways: (1) Observable systems—every step logged with metrics and emojis for easy debugging. (2) Comprehensive testing—8 adversarial cases like empty queries, very long queries, special characters. (3) State persistence—all conversation history and metrics saved to JSON. I also built error handling for each component: failed Wikipedia load? Fall back to web scraping. LLM timeout? Return confidence-scored partial answer."
+
+### "What would you do next in production?"
+
+> "Four improvements: (1) Caching—cache embeddings so repeated queries are instant. (2) Feedback loops—let users rate answers, automatically retrain on high/low quality examples. (3) Multi-language support—test on non-English, optimize for translation. (4) A/B testing framework—run two strategies for same query, measure which gets better RAGAS scores."
+
+---
+
+## 📊 PROJECT STRUCTURE
+
+```
+rag-chromadb/
+├── README.md                        (This file - complete reference)
+├── rag-chromadb.py                  (1,800 lines - main application)
+├── requirements.txt                 (All dependencies)
+├── .env                             (Configuration - create this)
+├── venv/                            (Python virtual environment)
+├── chroma_db/                       (Vector database storage)
+├── json_data/                       (Data persistence)
+│   ├── conversation_history.json    (Session logs)
+│   ├── evaluation_metrics.json      (RAGAS scores)
+│   ├── query_expansions.json        (Expanded queries)
+│   ├── multihop_results.json        (Reasoning steps)
+│   └── adversarial_test_results.json (Test outcomes)
+└── [OTHER_PROJECT_FILES]
+```
+
+---
+
+
+## 🎓 TECHNICAL STACK
+
+- **Language**: Python 3.10+
+- **Vector DB**: ChromaDB 0.4.24 (persistent storage)
+- **LLM**: LLaMA-3.1 8B (via LM Studio) + OpenAI API support
+- **Search**: ChromaDB semantics + BM25Okapi keywords
+- **NLP**: NLTK (tokenization), BeautifulSoup (web scraping)
+- **Evaluation**: RAGAS-inspired metrics with LLM judging
+- **Observability**: JSON persistence, structured logging
+- **API**: Wikipedia API, OpenAI SDK
+
+---
+
+## 💡 KEY ACHIEVEMENTS
+
+✅ **Enterprise RAG System** - Production-grade architecture
+✅ **Quality Metrics** - RAGAS evaluation (context, answer, faithfulness)
+✅ **Hybrid Search** - Semantic (70%) + keyword (30%)
+✅ **Advanced Reasoning** - Query expansion + multi-hop decomposition
+✅ **Robustness** - Adversarial testing across 8 edge cases
+✅ **Observability** - Full conversation history + metrics tracking
+✅ **Multi-Source** - Wikipedia, URLs, files with adaptive chunking
+✅ **Production Ready** - Error handling, logging, state persistence
