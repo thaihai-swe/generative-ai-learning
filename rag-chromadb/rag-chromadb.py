@@ -19,6 +19,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from tabulate import tabulate
+from PyPDF2 import PdfReader
 
 # Disable ChromaDB telemetry at module load time
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
@@ -811,19 +812,63 @@ class MultiSourceDataLoader:
 
     @staticmethod
     def load_file(file_path: str) -> Optional[str]:
-        """Load content from a local text file."""
+        """Load content from a local file (TXT, MD, or PDF)."""
         logger.info(f"📄 Loading file: {file_path}")
+        try:
+            # Check if file is PDF
+            if file_path.lower().endswith('.pdf'):
+                return MultiSourceDataLoader._load_pdf(file_path)
+            else:
+                # Plain text (TXT, MD)
+                return MultiSourceDataLoader._load_text_file(file_path)
+
+        except Exception as e:
+            logger.error(f"❌ File loading failed: {str(e)}")
+            return None
+
+    @staticmethod
+    def _load_text_file(file_path: str) -> Optional[str]:
+        """Load content from a text file (TXT, MD)."""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 text = f.read()
 
             if text:
-                logger.info(f"✅ Retrieved {len(text)} characters from file")
+                logger.info(f"✅ Retrieved {len(text)} characters from text file")
                 return text
             return None
 
         except Exception as e:
-            logger.error(f"❌ File loading failed: {str(e)}")
+            logger.error(f"❌ Text file loading failed: {str(e)}")
+            return None
+
+    @staticmethod
+    def _load_pdf(file_path: str) -> Optional[str]:
+        """Load content from a PDF file."""
+        try:
+            pdf_reader = PdfReader(file_path)
+            num_pages = len(pdf_reader.pages)
+            logger.info(f"📕 PDF detected: {num_pages} pages")
+
+            extracted_text = ""
+            for page_num, page in enumerate(pdf_reader.pages, 1):
+                try:
+                    page_text = page.extract_text()
+                    if page_text:
+                        extracted_text += f"\n--- Page {page_num} ---\n{page_text}"
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to extract page {page_num}: {str(e)}")
+                    continue
+
+            if extracted_text:
+                logger.info(f"✅ Retrieved {len(extracted_text)} characters from PDF ({num_pages} pages)")
+                return extracted_text
+            else:
+                logger.warning(f"⚠️ No text could be extracted from PDF")
+                return None
+
+        except Exception as e:
+            logger.error(f"❌ PDF loading failed: {str(e)}")
             return None
 
     @staticmethod

@@ -605,7 +605,28 @@ python rag-chromadb.py
 
 ## 🎮 COMMANDS REFERENCE
 
-### Load Sources
+### Core Commands
+
+| Command         | Purpose                       | Example                  |
+| --------------- | ----------------------------- | ------------------------ |
+| `load <source>` | Load Wikipedia, URL, or file  | `load Cristiano Ronaldo` |
+| `sources`       | Show all loaded sources       | `sources`                |
+| `<question>`    | Ask standard RAG query        | `What is relativity?`    |
+| `history`       | Show conversation history     | `history`                |
+| `metrics`       | Show RAGAS evaluation metrics | `metrics`                |
+| `clear`         | Clear conversation history    | `clear`                  |
+| `quit`          | Exit application              | `quit`                   |
+
+### Phase 2 Advanced Commands
+
+| Command            | Purpose                        | Example                                       |
+| ------------------ | ------------------------------ | --------------------------------------------- |
+| `expand <query>`   | Query expansion (4 variations) | `expand What was Einstein's early life?`      |
+| `multihop <query>` | Multi-hop reasoning (3 steps)  | `multihop How did relativity change physics?` |
+| `expansions`       | Show query expansion history   | `expansions`                                  |
+| `multihop-results` | Show multi-hop results         | `multihop-results`                            |
+| `test`             | Run adversarial test suite     | `test`                                        |
+| `test-results`     | Show test results              | `test-results`                                |
 
 ---
 
@@ -696,16 +717,32 @@ Step 3: How did this change our understanding?
 
 ## 🧪 TESTING & VALIDATION
 
-### Quick Test (5 minutes)
+### Quick Test Matrix
 
-```bash
-# Test all core features
-load "Cristiano Ronaldo"
-What are his achievements?
-history
-metrics
-quit
-```
+#### 5-Minute Test
+1. `load Cristiano Ronaldo`
+2. Ask about his football career
+3. `metrics`
+4. `quit`
+
+#### 10-Minute Test
+1. `load Cristiano Ronaldo`
+2. Ask about his achievements
+3. `expand What was his early life like?`
+4. `multihop How did he become famous?`
+5. `metrics`
+6. `quit`
+
+#### 20-Minute Full Test
+1. `load Cristiano Ronaldo`
+2. Ask about career achievements
+3. `expand What was his early life like?`
+4. `multihop How did he become a legend?`
+5. `test`
+6. `test-results`
+7. `metrics`
+8. `history`
+9. `quit`
 
 ### Full Test Suite
 
@@ -783,6 +820,96 @@ load Cristiano Ronaldo
 ### "What would you do next in production?"
 
 > "Four improvements: (1) Caching—cache embeddings so repeated queries are instant. (2) Feedback loops—let users rate answers, automatically retrain on high/low quality examples. (3) Multi-language support—test on non-English, optimize for translation. (4) A/B testing framework—run two strategies for same query, measure which gets better RAGAS scores."
+
+### Query Cheat Sheet: Interview Triggers
+
+When an interviewer asks...
+
+**"How does retrieval work?"** →
+```
+expand What was Einstein's biggest achievement?
+```
+Then show the 4 variations generated and explain coverage improvement
+
+**"Can it handle complex questions?"** →
+```
+multihop How did Einstein's work lead to nuclear physics?
+```
+Then show the 3-step decomposition and synthesis
+
+**"How do you ensure quality?"** →
+```
+metrics
+```
+Then explain RAGAS metrics and threshold logic
+
+**"What about hallucinations?"** →
+```
+multihop [obviously false premise question]
+metrics
+```
+Then show how faithfulness metric catches made-up answers
+
+**"How is this different from ChatGPT?"** →
+```
+history
+```
+Then show complete source attribution and conversation context
+
+### Expected Outputs Cheat Sheet
+
+| Output                 | Interpretation                     |
+| ---------------------- | ---------------------------------- |
+| Context Relevance: 85% | Good retrieval quality             |
+| Answer Relevance: 90%  | LLM stays on-topic                 |
+| Faithfulness: 82%      | Some hallucination detected        |
+| Passed: 7/8 tests      | Robust system, one edge case issue |
+| Confidence: 75%        | Answer is less certain             |
+| ✓ 3 chunks retrieved   | Got good information diversity     |
+
+### Warning Signs
+
+| Warning                 | Action                                      |
+| ----------------------- | ------------------------------------------- |
+| Faithfulness <75%       | System hallucinates, needs better prompting |
+| Confidence <60%         | Answer is unreliable, check retrieval       |
+| Tests <70% passing      | Edge cases not handled well                 |
+| Same metrics repeatedly | Query quality may not matter, check setup   |
+
+---
+
+## ✅ FINAL CHECKLIST & PRO TIPS
+
+### Before Demo Checklist
+
+- [ ] Python venv activated
+- [ ] Sources pre-loaded (if planned)
+- [ ] Network connection working
+- [ ] Terminal at readable zoom level
+- [ ] `.env` file configured with API keys
+- [ ] Know your 3 talking points
+- [ ] Have backup demo (screenshots/video)
+- [ ] Run one query to verify metrics show
+- [ ] Test suite results available
+
+### Pro Tips for Impressive Demos
+
+1. **Pre-load sources** before demo starts (saves 30 seconds of API calls)
+2. **Have 2-3 questions** pre-planned (shows confidence and prevents stammering)
+3. **Explain metrics** even if people don't ask (shows deep technical knowledge)
+4. **Show the code** briefly to prove it's not fake (shows implementation rigor)
+5. **Run tests** if time permits (demonstrates robustness validation)
+6. **Save metrics output** for later reference (portfolio artifact)
+7. **Use emojis consistently** in narration (makes it memorable)
+8. **Time your demo** beforehand (nobody likes surprises)
+
+### Demo Time Planning
+
+- **Quick validation**: 3 minutes (load + query + metrics)
+- **Technical interview**: 10 minutes (load + query + expand + metrics)
+- **Full demo**: 15 minutes (all features + tests)
+- **Full test suite**: 30 minutes (complete with adversarial testing)
+- **Deep dive**: 45+ minutes (code walkthrough + live modifications)
 
 ---
 
