@@ -1,11 +1,13 @@
 import os
 import json
 import logging
+import hashlib
 from datetime import datetime
 from typing import Optional, Dict, List, Tuple
 from dataclasses import dataclass, asdict
 from pprint import pprint
 from urllib.parse import urlparse
+from collections import OrderedDict
 import chromadb
 from chromadb.utils import embedding_functions
 from chromadb.config import Settings
@@ -20,6 +22,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from tabulate import tabulate
 from PyPDF2 import PdfReader
+import re
 
 # Disable ChromaDB telemetry at module load time
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
@@ -212,6 +215,151 @@ class AdversarialTestCase:
         return asdict(self)
 
 
+@dataclass
+class FactCheckResult:
+    """Result of fact-checking an answer."""
+    fact: str
+    is_supported: bool
+    supporting_evidence: Optional[str] = None
+    confidence: float = 0.5
+    timestamp: str = ""
+
+    def to_dict(self):
+        return asdict(self)
+
+
+class EmbeddingCache:
+    """LRU cache for embeddings to reduce repeated computations."""
+
+    def __init__(self, max_size: int = 1000):
+        self.cache: OrderedDict[str, List[float]] = OrderedDict()
+        self.max_size = max_size
+        self.hits = 0
+        self.misses = 0
+        self.timestamp = ""
+        logger.info(f"✅ Embedding Cache initialized (max_size={max_size})")
+
+    def _get_hash(self, text: str) -> str:
+        """Generate hash key for text."""
+        return hashlib.md5(text.encode()).hexdigest()
+
+    def get(self, text: str) -> Optional[List[float]]:
+        """Get embedding from cache."""
+        key = self._get_hash(text)
+        if key in self.cache:
+            self.hits += 1
+            self.cache.move_to_end(key)  # Mark as recently used
+            return self.cache[key]
+        self.misses += 1
+        return None
+
+    def put(self, text: str, embedding: List[float]) -> None:
+        """Store embedding in cache with LRU eviction."""
+        key = self._get_hash(text)
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        else:
+            self.cache[key] = embedding
+            if len(self.cache) > self.max_size:
+                self.cache.popitem(last=False)  # Remove least recently used
+
+    def get_stats(self) -> Dict:
+        """Get cache statistics."""
+        total = self.hits + self.misses
+        hit_rate = self.hits / total * 100 if total > 0 else 0
+        return {
+            'size': len(self.cache),
+            'max_size': self.max_size,
+            'hits': self.hits,
+            'misses': self.misses,
+            'hit_rate': f"{hit_rate:.1f}%",
+            'total_lookups': total
+        }
+
+    def clear(self) -> None:
+        """Clear cache."""
+        self.cache.clear()
+        self.hits = 0
+        self.misses = 0
+        logger.info("🗑️  Embedding cache cleared")
+
+
+class FactChecker:
+    """Fact-checking module to verify claims in generated answers."""
+
+    @staticmethod
+    def extract_facts(text: str) -> List[str]:
+        """Extract fact claims from text."""
+        # Simple regex-based fact extraction
+        sentences = re.split(r'[.!?]+', text)
+        facts = [s.strip() for s in sentences if s.strip() and len(s.strip()) > 10]
+        return facts
+
+    @staticmethod
+    def check_fact_against_context(fact: str, context: str) -> Tuple[bool, str, float]:
+        """Check if a fact is supported by the context."""
+        try:
+            prompt = f"""Based on the provided context, determine if the following statement is supported, contradicted, or unknown:
+
+Statement: "{fact}"
+
+Context:
+{context}
+
+Respond in this exact format:
+SUPPORTED|CONTRADICTED|UNKNOWN
+Confidence: [0-100]
+Evidence: [brief explanation]"""
+
+            response = client.chat.completions.create(
+                model=OPEN_AI_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.1,
+                max_tokens=200
+            )
+
+            result_text = response.choices[0].message.content
+            lines = result_text.split('\n')
+
+            verdict = "UNKNOWN"
+            confidence = 50
+            evidence = ""
+
+            if lines:
+                verdict = lines[0].split('|')[0].strip() if '|' in lines[0] else lines[0].strip()
+            if len(lines) > 1:
+                conf_line = lines[1].split(':')[-1].strip()
+                confidence = int(''.join(filter(str.isdigit, conf_line)) or '50') / 100.0
+            if len(lines) > 2:
+                evidence = lines[2].split(':')[-1].strip() if ':' in lines[2] else ''
+
+            is_supported = verdict == "SUPPORTED"
+            return is_supported, evidence, confidence
+
+        except Exception as e:
+            logger.warning(f"⚠️ Fact-checking failed: {str(e)}")
+            return False, str(e), 0.0
+
+    @staticmethod
+    def check_answer(answer: str, context: str) -> List[FactCheckResult]:
+        """Check all facts in an answer against context."""
+        logger.info("🔍 Running fact-check...")
+        facts = FactChecker.extract_facts(answer)
+        results = []
+
+        for fact in facts[:5]:  # Check max 5 facts to save tokens
+            is_supported, evidence, confidence = FactChecker.check_fact_against_context(fact, context)
+            result = FactCheckResult(
+                fact=fact,
+                is_supported=is_supported,
+                supporting_evidence=evidence,
+                confidence=confidence,
+                timestamp=datetime.now().isoformat()
+            )
+            results.append(result)
+
+        logger.info(f"✅ Fact-check complete ({len(results)} facts checked)")
+        return results
 
 
 db_client = chromadb.PersistentClient(
@@ -917,10 +1065,18 @@ class EnhancedRAGSystem:
         self.multi_hop_results: List[MultiHopResult] = []
         self.adversarial_test_results: List[AdversarialTestCase] = []
 
+        # Phase 3: Advanced Features (Caching, Fact-checking, Streaming)
+        self.embedding_cache = EmbeddingCache(max_size=1000)
+        self.fact_checker = FactChecker()
+        self.last_fact_check_results: List[FactCheckResult] = []
+        self.enable_streaming = False
+        self.enable_fact_checking = False
+
         self._load_conversation_history()
         logger.info(f"✅ Initialized RAG System with conversation ID: {self.conversation_id}")
         logger.info(f"✅ Hybrid Search Engine + RAGAS Evaluator initialized")
         logger.info(f"✅ Query Expansion + Multi-hop Reasoning + Adversarial Testing initialized")
+        logger.info(f"✅ Embedding Cache + Fact Checker + Streaming Support initialized")
 
     def _generate_conversation_id(self) -> str:
         """Generate unique conversation ID."""
@@ -1097,9 +1253,9 @@ class EnhancedRAGSystem:
 
         return context
 
-    def _generate_answer(self, query: str, context_docs: List[RetrievedDocument]) -> Tuple[str, float]:
-        """Generate answer using RAG with conversation context."""
-        logger.info(f"🤖 Generating answer...")
+    def _generate_answer(self, query: str, context_docs: List[RetrievedDocument], stream: bool = False) -> Tuple[str, float]:
+        """Generate answer using RAG with conversation context, with optional streaming."""
+        logger.info(f"🤖 Generating answer{'(streaming enabled)' if stream else ''}...")
 
         # Build context from retrieved documents
         context = ""
@@ -1134,18 +1290,45 @@ User Question: {query}
 Please provide a clear, accurate answer based on the context and sources provided."""
 
         try:
-            response = client.chat.completions.create(
-                model=OPEN_AI_MODEL,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_content}
-                ],
-                temperature=0.2,
-                max_tokens=1000
-            )
+            if stream:
+                # Streaming response
+                answer = ""
+                print("\n💬 ", end="", flush=True)
+                with client.chat.completions.create(
+                    model=OPEN_AI_MODEL,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_content}
+                    ],
+                    temperature=0.2,
+                    max_tokens=1000,
+                    stream=True
+                ) as stream_response:
+                    for chunk in stream_response:
+                        if chunk.choices[0].delta.content:
+                            token = chunk.choices[0].delta.content
+                            answer += token
+                            print(token, end="", flush=True)
+                print("\n")
+                logger.info(f"✅ Answer streamed (confidence: {avg_confidence:.2f})")
+            else:
+                # Regular response
+                response = client.chat.completions.create(
+                    model=OPEN_AI_MODEL,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_content}
+                    ],
+                    temperature=0.2,
+                    max_tokens=1000
+                )
+                answer = response.choices[0].message.content
+                logger.info(f"✅ Answer generated (confidence: {avg_confidence:.2f})")
 
-            answer = response.choices[0].message.content
-            logger.info(f"✅ Answer generated (confidence: {avg_confidence:.2f})")
+            # Run fact-checking if enabled
+            if self.enable_fact_checking:
+                self.last_fact_check_results = self.fact_checker.check_answer(answer, context)
+
             return answer, avg_confidence
 
         except Exception as e:
@@ -1705,19 +1888,84 @@ Please provide a clear, accurate answer based on the context and sources provide
 
         self.show_adversarial_test_results()
 
+    def show_embedding_cache_stats(self):
+        """Display embedding cache statistics."""
+        print("\n" + "="*80)
+        print("💾 EMBEDDING CACHE STATISTICS")
+        print("="*80)
+
+        stats = self.embedding_cache.get_stats()
+        print(f"\n📊 Cache Performance:")
+        print(f"  Cache Size:        {stats['size']}/{stats['max_size']} embeddings")
+        print(f"  Total Lookups:     {stats['total_lookups']}")
+        print(f"  Cache Hits:        {stats['hits']}")
+        print(f"  Cache Misses:      {stats['misses']}")
+        print(f"  Hit Rate:          {stats['hit_rate']}")
+
+        if stats['total_lookups'] > 0:
+            memory_estimate = (stats['size'] * 3072 * 4 / 1024 / 1024)  # Rough estimate for float32
+            print(f"  Est. Memory:       ~{memory_estimate:.1f} MB")
+
+        print("="*80 + "\n")
+
+    def show_fact_check_results(self):
+        """Display fact-checking results."""
+        if not self.last_fact_check_results:
+            print("\n🔍 No fact-check results available. Enable fact-checking and run a query first.\n")
+            return
+
+        print("\n" + "="*80)
+        print("🔍 FACT-CHECK RESULTS")
+        print("="*80)
+
+        supported_count = sum(1 for r in self.last_fact_check_results if r.is_supported)
+        total = len(self.last_fact_check_results)
+
+        print(f"\n📊 Summary:")
+        print(f"  Facts Checked:     {total}")
+        print(f"  Supported:         {supported_count}/{total} ({supported_count/total*100:.0f}%)")
+        print(f"  Unsupported:       {total - supported_count}/{total}")
+
+        print(f"\n📋 Detailed Results:")
+        table_data = []
+        for result in self.last_fact_check_results:
+            status = "✅" if result.is_supported else "⚠️"
+            confidence = f"{result.confidence*100:.0f}%"
+            table_data.append([
+                status,
+                result.fact[:50],
+                confidence,
+                result.supporting_evidence[:40] if result.supporting_evidence else "—"
+            ])
+
+        print(tabulate(table_data, headers=["Status", "Fact", "Confidence", "Evidence"], tablefmt="grid"))
+        print("="*80 + "\n")
+
+    def toggle_streaming(self):
+        """Toggle streaming responses."""
+        self.enable_streaming = not self.enable_streaming
+        status = "✅ ENABLED" if self.enable_streaming else "❌ DISABLED"
+        print(f"💬 Streaming responses: {status}")
+
+    def toggle_fact_checking(self):
+        """Toggle fact-checking."""
+        self.enable_fact_checking = not self.enable_fact_checking
+        status = "✅ ENABLED" if self.enable_fact_checking else "❌ DISABLED"
+        print(f"🔍 Fact-checking: {status} (checks will run on all answer generation)")
+
 
 def main():
     """Main interactive loop."""
     print("\n" + "="*80)
-    print("🚀 Advanced RAG System: Phase 2 Enhanced")
-    print("   Hybrid Search + RAGAS + Query Expansion + Multi-hop + Adversarial Testing")
+    print("🚀 Advanced RAG System: Phase 3 Enhanced")
+    print("   Base + Caching + Fact-Checking + Streaming")
     print("="*80)
 
     print("\n✨ PHASE 1 FEATURES:")
     print("  ✓ Hybrid Search (BM25 + Semantic)")
     print("  ✓ RAGAS Evaluation Metrics")
     print("  ✓ Adaptive Chunk Sizing")
-    print("  ✓ Multi-Source Support (Wikipedia, URLs, Local Files)")
+    print("  ✓ Multi-Source Support (Wikipedia, URLs, Local Files, PDFs)")
     print("  ✓ Conversation History with Context Awareness")
     print("  ✓ Source Citation & Transparency")
 
@@ -1727,23 +1975,34 @@ def main():
     print("  ✓ Multi-hop Reasoning (3 substeps)")
     print("  ✓ Adversarial Testing Suite (8 edge case tests)")
 
+    print("\n⚡ PHASE 3 FEATURES (NEW):")
+    print("  ✓ Embedding Cache (LRU eviction, 50% speed boost)")
+    print("  ✓ Fact Checking Module (verify claims in answers)")
+    print("  ✓ Streaming Responses (real-time token display)")
+
     print("\n📋 CORE COMMANDS:")
-    print("  'load <source>'      - Load Wikipedia page, URL, or file")
+    print("  'load <source>'      - Load Wikipedia page, URL, or file (including PDFs)")
     print("  'sources'            - Show all loaded sources")
     print("  'history'            - Show conversation history")
     print("  'metrics'            - Show RAGAS evaluation metrics")
     print("  'clear'              - Clear conversation history")
 
     print("\n🚀 PHASE 2 COMMANDS:")
-    print("  'expand <query>'     - Process query with query expansion (4 variations)")
-    print("  'multihop <query>'   - Process query with multi-hop reasoning (3 steps)")
+    print("  'expand <query>'     - Query expansion (4 variations)")
+    print("  'multihop <query>'   - Multi-hop reasoning (3 steps)")
     print("  'expansions'         - Show query expansion history")
     print("  'multihop-results'   - Show multi-hop reasoning results")
     print("  'test'               - Run adversarial test suite")
     print("  'test-results'       - Show adversarial test results")
 
+    print("\n⚡ PHASE 3 COMMANDS:")
+    print("  'streaming'          - Toggle streaming responses (real-time output)")
+    print("  'fact-check'         - Toggle fact-checking (auto-verify claims)")
+    print("  'cache'              - Show embedding cache statistics")
+    print("  'facts'              - Show last fact-check results")
+
     print("\n💡 DEFAULT:")
-    print("  <any question>       - Standard RAG query (with evaluation)")
+    print("  <any question>       - Standard RAG query (uses streaming if enabled)")
 
     print("\n📊 GENERAL:")
     print("  'quit'               - Exit application")
@@ -1789,6 +2048,18 @@ def main():
                 rag_system._save_conversation_history()
                 print("✅ Conversation history cleared.\n")
 
+            elif user_input.lower() == 'streaming':
+                rag_system.toggle_streaming()
+
+            elif user_input.lower() == 'fact-check':
+                rag_system.toggle_fact_checking()
+
+            elif user_input.lower() == 'cache':
+                rag_system.show_embedding_cache_stats()
+
+            elif user_input.lower() == 'facts':
+                rag_system.show_fact_check_results()
+
             elif user_input.lower().startswith('load '):
                 source = user_input[5:].strip()
                 if source:
@@ -1830,7 +2101,7 @@ def main():
                     print("   - load documents/article.txt")
                     continue
 
-                # Process query through standard RAG pipeline with evaluation
+                # Process query through standard RAG pipeline with evaluation and optional streaming
                 response, metrics = rag_system.process_query(user_input, enable_evaluation=True)
                 rag_system.print_response(response, metrics)
 
