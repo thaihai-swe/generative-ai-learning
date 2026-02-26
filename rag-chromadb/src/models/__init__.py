@@ -6,6 +6,10 @@ from src.models.data_models import (
     RAGASMetrics,
     EvaluationResult,
     FactCheckResult,
+    QueryExpansion,
+    MultiHopStep,
+    MultiHopResult,
+    AdversarialTestCase,
 )
 from src.models.enums import SourceType, RetrievalMethod, ContentType
 
@@ -16,7 +20,10 @@ __all__ = [
     "RAGASMetrics",
     "EvaluationResult",
     "FactCheckResult",
-    "SourceType",
+    "QueryExpansion",
+    "MultiHopStep",
+    "MultiHopResult",
+    "AdversarialTestCase",    "SourceType",
     "RetrievalMethod",
     "ContentType",
 ]

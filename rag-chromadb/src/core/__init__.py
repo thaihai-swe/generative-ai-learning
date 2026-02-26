@@ -59,8 +59,6 @@ class EnhancedRAGSystem:
         self.collections = {}
         self.loaded_sources = {}
         self.last_fact_check_results = []
-        self.query_expansions = []
-        self.multi_hop_results = []
 
         logger.info("✅ Enhanced RAG System initialized")
 

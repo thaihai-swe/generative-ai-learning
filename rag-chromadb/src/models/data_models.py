@@ -106,3 +106,62 @@ class FactCheckResult:
 
     def to_dict(self):
         return asdict(self)
+
+@dataclass
+class QueryExpansion:
+    """Query expansion result with variations."""
+    original_query: str
+    variations: List[str]  # Generated query variations
+    expansion_method: str  # 'paraphrase', 'synonym', 'decompose'
+    timestamp: str
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass
+class MultiHopStep:
+    """Single step in multi-hop reasoning."""
+    step_number: int
+    subquery: str
+    retrieved_docs: List[str]  # Content snippets
+    reasoning: str  # Why this step
+    relevance_score: float
+
+    def to_dict(self):
+        return asdict(self)
+
+
+@dataclass
+class MultiHopResult:
+    """Complete multi-hop reasoning result."""
+    original_query: str
+    steps: List[MultiHopStep]
+    final_answer: str
+    total_confidence: float
+    timestamp: str
+
+    def to_dict(self):
+        return {
+            'original_query': self.original_query,
+            'steps': [step.to_dict() for step in self.steps],
+            'final_answer': self.final_answer,
+            'total_confidence': self.total_confidence,
+            'timestamp': self.timestamp
+        }
+
+
+@dataclass
+class AdversarialTestCase:
+    """Adversarial test case for RAG system."""
+    test_id: str
+    query: str
+    test_type: str  # 'ambiguous', 'no_answer', 'conflicting', 'edge_case'
+    expected_behavior: str  # What should happen
+    result: Optional[str] = None
+    passed: Optional[bool] = None
+    error_message: Optional[str] = None
+    timestamp: str = ""
+
+    def to_dict(self):
+        return asdict(self)

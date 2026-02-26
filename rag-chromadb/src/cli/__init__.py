@@ -36,8 +36,6 @@ class InteractiveRAG:
         print("\n🚀 ADVANCED COMMANDS:")
         print("  expand <query>                 - Query expansion (4 variations)")
         print("  multihop <query>               - Multi-hop reasoning")
-        print("  expansions                     - Show expansion history")
-        print("  multihop-results               - Show multi-hop results")
 
         print("\n⚡ SETTINGS & TOOLS:")
         print("  streaming                      - Toggle streaming responses")
@@ -120,14 +118,6 @@ class InteractiveRAG:
 
         if cmd == 'multihop':
             self._handle_multihop(user_input)
-            return True
-
-        if cmd == 'expansions':
-            self._show_expansions()
-            return True
-
-        if cmd == 'multihop-results':
-            self._show_multihop_results()
             return True
 
         # Settings
@@ -316,8 +306,6 @@ class InteractiveRAG:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   expand <query>                    Query expansion (4 variations)
   multihop <query>                  Multi-hop reasoning (3 steps)
-  expansions                        Show expansion history
-  multihop-results                  Show reasoning results
 
 ⚡ SETTINGS & TOGGLES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -416,41 +404,6 @@ class InteractiveRAG:
 
         print(tabulate(table_data, headers=["Query", "Confidence", "Docs"], tablefmt="grid"))
         print("="*80 + "\n")
-
-    def _show_expansions(self) -> None:
-        """Show query expansion history"""
-        if not hasattr(self.rag, 'query_expansions') or not self.rag.query_expansions:
-            print("\n🔄 No query expansions performed yet.\n")
-            return
-
-        print(f"\n🔄 QUERY EXPANSION HISTORY")
-        print("="*80)
-
-        for i, exp in enumerate(self.rag.query_expansions[-5:], 1):
-            print(f"\n[{i}] Original: {exp.get('original_query', '')[:60]}")
-            variations = exp.get('variations', [])
-            for j, var in enumerate(variations[:3], 1):
-                print(f"    {j}. {var}")
-
-        print("\n" + "="*80 + "\n")
-
-    def _show_multihop_results(self) -> None:
-        """Show multi-hop reasoning results"""
-        if not hasattr(self.rag, 'multi_hop_results') or not self.rag.multi_hop_results:
-            print("\n🎯 No multi-hop reasoning performed yet.\n")
-            return
-
-        print(f"\n🎯 MULTI-HOP REASONING RESULTS")
-        print("="*80)
-
-        for result in self.rag.multi_hop_results[-3:]:
-            print(f"\nQuery: {result.get('original_query', '')[:60]}")
-            if result.get('steps'):
-                print(f"Steps: {len(result['steps'])}")
-                for step in result['steps'][:2]:
-                    print(f"  • {step.get('subquery', '')[:50]}")
-
-        print("\n" + "="*80 + "\n")
 
     def _show_fact_results(self) -> None:
         """Show fact-checking results"""

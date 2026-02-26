@@ -270,7 +270,7 @@ learns to generate coherent text.
 ### In Your Project
 
 ```python
-# Lines 33-35 in rag-chromadb.py
+# src/models/config.py
 OPEN_AI_API_BASE_URL = "http://127.0.0.1:1234/v1"
 OPEN_AI_MODEL = "meta-llama-3.1-8b-instruct"
 
@@ -278,7 +278,7 @@ OPEN_AI_MODEL = "meta-llama-3.1-8b-instruct"
 # 8B = 8 Billion parameters (8 billion numbers to tune)
 # Smaller but faster than GPT-4 (1.7T parameters)
 
-# Usage:
+# Used in src/generation/__init__.py:
 response = client.chat.completions.create(
     model=OPEN_AI_MODEL,
     messages=[
@@ -412,7 +412,7 @@ def euclidean_distance(vec1, vec2):
 ### In Your Project
 
 ```python
-# Lines 260-265: Initialize embedding function
+# src/retrieval/loader.py: Initialize embedding function
 embedding_function = embedding_functions.DefaultEmbeddingFunction()
 
 # Embedded automatically when adding to ChromaDB:
@@ -498,7 +498,7 @@ Approximate Nearest Neighbor Search ← What ChromaDB uses
 ### In Your Project
 
 ```python
-# Initialize ChromaDB (lines 260-265)
+# src/retrieval/loader.py: Initialize ChromaDB
 db_client = chromadb.PersistentClient(
     path="./chroma_db",  # Local persistent storage
     settings=Settings(
@@ -507,7 +507,7 @@ db_client = chromadb.PersistentClient(
     )
 )
 
-# Add documents (lines 908-923)
+# src/core/__init__.py: Add documents
 collection.add(
     ids=[f"chunk_{i}" for i in range(100)],
     documents=[chunk1, chunk2, ..., chunk100],  # Raw text
@@ -521,7 +521,7 @@ collection.add(
 # 2. Stores in vector database
 # 3. Creates search index
 
-# Query (lines 985+)
+# src/retrieval/hybrid_search.py: Query
 response = collection.query(
     query_embeddings=embedding_function([user_query]),
     n_results=3
@@ -602,7 +602,7 @@ Semantic Search (SUCCEEDS):
 ### In Your Project
 
 ```python
-# Lines 985-1007: Semantic search
+# src/retrieval/hybrid_search.py: Semantic search
 response = collection.query(
     query_embeddings=embedding_function([user_query]),
     n_results=3,
@@ -621,7 +621,7 @@ response = collection.query(
     "metadatas": [...]
 }
 
-# Store as RetrievedDocument (line 1088):
+# Store as RetrievedDocument (in src/retrieval/hybrid_search.py):
 for doc, distance, metadata in zip(...):
     retrieved_docs.append(RetrievedDocument(
         content=doc,
@@ -699,10 +699,10 @@ def bm25_score(word_count, doc_length, avg_doc_length, total_docs):
 ### In Your Project
 
 ```python
-# Lines 18: Import BM25
+# src/retrieval/hybrid_search.py
 from rank_bm25 import BM25Okapi
 
-# Lines 290-328: HybridSearchEngine class
+# HybridSearchEngine.keyword_search() method
 def keyword_search(self, collection_name, query, top_k=3):
     # 1. Tokenize query
     query_tokens = self._tokenize(query)
@@ -789,7 +789,7 @@ Hybrid Search (Combine Both):
 ### In Your Project
 
 ```python
-# Lines 360-380: Hybrid search implementation
+# src/retrieval/hybrid_search.py: Hybrid search implementation
 def hybrid_search(self, query, semantic_results, keyword_results):
     combined = {}
 
@@ -808,7 +808,7 @@ def hybrid_search(self, query, semantic_results, keyword_results):
     # Return sorted by combined score
     return sorted(combined.items(), key=lambda x: x[1], reverse=True)
 
-# Configure weights (lines 45-46):
+# Configure weights (in src/models/config.py):
 HYBRID_SEARCH_WEIGHT_SEMANTIC = 0.7  # 70% importance
 HYBRID_SEARCH_WEIGHT_KEYWORD = 0.3   # 30% importance
 ```
@@ -855,7 +855,7 @@ With expansion:
 ### Implementation
 
 ```python
-# Lines 597-640: QueryExpander class
+# src/reasoning/query_expander.py: QueryExpander class
 
 @staticmethod
 def generate_variations(query: str, num_variations: int = 4):
@@ -882,7 +882,7 @@ def generate_variations(query: str, num_variations: int = 4):
 ### In RAG Pipeline
 
 ```python
-# Lines 1108-1125: process_query_with_expansion
+# src/core/__init__.py: process_query_with_expansion
 
 def process_query_with_expansion(user_query, num_expansions=4):
     # 1. Generate variations
@@ -957,7 +957,7 @@ AI should mirror this!
 ### Implementation
 
 ```python
-# Lines 635-680: MultiHopReasoner class
+# src/reasoning/multi_hop_reasoner.py: MultiHopReasoner class
 
 def decompose_query(query: str, max_steps: int = 3):
     """Break query into sub-questions"""
@@ -1015,7 +1015,7 @@ User Query: "How did Ronaldo become the greatest?"
 ### Code in Your Project
 
 ```python
-# Lines 1181-1245: process_query_multihop
+# src/reasoning/multi_hop_reasoner.py and src/core/__init__.py
 
 def process_query_multihop(user_query, max_steps=3):
     # Step 1: Decompose
@@ -1089,7 +1089,7 @@ Context Relevance = LLM_Score(Is document relevant to query?)
                   = Human judgment of relevance
 ```
 
-**In Code (lines 471-499):**
+**In Code (src/evaluation/ragas_evaluator.py):**
 ```python
 def evaluate_context_relevance(query: str, context: str):
     prompt = f"""Query: {query}
@@ -1121,7 +1121,7 @@ Scenario 2 (Good):
   Relevance: ✅ 0.99/1.0 (Directly answers)
 ```
 
-**In Code (lines 502-530):**
+**In Code (src/evaluation/ragas_evaluator.py):**
 ```python
 def evaluate_answer_relevance(query: str, answer: str):
     prompt = f"""Query: {query}
@@ -1154,7 +1154,7 @@ Scenario 3 (Okay - Simplification):
   Faithfulness: ⚠️ 0.7/1.0 (True but simplified)
 ```
 
-**In Code (lines 520-548):**
+**In Code (src/evaluation/ragas_evaluator.py):**
 ```python
 def evaluate_faithfulness(context: str, answer: str):
     prompt = f"""Context: {context[:500]}
@@ -1172,7 +1172,7 @@ This detects hallucinations - the biggest problem with LLMs!
 ### Computing RAG Score
 
 ```python
-# Lines 570-580:
+# src/evaluation/ragas_evaluator.py:
 
 def compute_rag_score(context_relevance, answer_relevance, faithfulness):
     weights = [0.30, 0.35, 0.35]

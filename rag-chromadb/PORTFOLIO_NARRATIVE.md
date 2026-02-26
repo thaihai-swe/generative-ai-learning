@@ -84,6 +84,35 @@ DATA INGESTION → RETRIEVAL → GENERATION → EVALUATION → DELIVERY
 > - Result: 87% pass rate (caught 1 bug)
 > - Outcome: Confidence that system is production-ready"
 
+### Phase 3: Production Architecture & Code Quality
+> "After achieving the core capabilities, I refactored the system from a monolithic 2100-line single file into a clean modular architecture. This wasn't about new features—it was about engineering excellence:
+
+> **Modular File Organization** (8 new dedicated modules)
+> - Problem: 2100 lines in one file → difficult to maintain, test, or modify
+> - Solution: Separated into logical modules (retrieval, reasoning, evaluation)
+> - Result: Each module 50-150 lines, single responsibility, easy to test
+> - Impact: Code readability improves, maintenance becomes manageable
+>
+> **Abstract Base Classes & Type Safety**
+> - Problem: Easy to accidentally break interfaces when modifying code
+> - Solution: Abstract base classes + dataclasses throughout
+> - Result: Type hints catch errors at edit-time, not runtime
+> - Impact: 'Fail fast' principle—bugs surface immediately
+>
+> **Clean Dead Code Removal**
+> - Problem: System had unfinished feature branches (expansions/multihop stored data)
+> - Solution: Audited CLI commands, removed non-functional code, kept active features
+> - Result: Removed ~140 lines of dead code, clearer feature set
+> - Impact: Easier for users to understand what actually works
+>
+> **Production Observability**
+> - Problem: Hard to debug which component is causing issues
+> - Solution: Systematic logging at each stage, metrics persisted to JSON
+> - Result: Full audit trail of every query and its quality metrics
+> - Impact: Can replay and analyze any interaction for debugging
+
+> **Why This Phase Matters**: This shows the difference between 'it works' and 'it's production-ready.' The best engineers don't just build features—they build systems that others can maintain, modify, and trust."
+
 ---
 
 ## 📊 ACT 3: The Results (Why This Matters)
@@ -138,6 +167,12 @@ Memory Per 100 Queries  ~50MB      ✅ Efficient
 ### Insight #5: Transparency Builds Trust
 > "Every feature I added that showed 'why' the system did something (source attribution, confidence scores, multi-step reasoning) made it more trustworthy, even though the underlying quality didn't change. The lesson: Trust is a feature, not a side-effect."
 
+### Insight #6: Monolithic Code Scales Until It Doesn't
+> "The system started in a single 2100-line file. It worked fine for v1. But as I added more features, finding code became harder, testing became fragile, and making changes risked breaking unrelated components. The refactoring into 8 modular files took a day but was worth weeks of future maintenance. The lesson: Refactor *before* you're forced to—architecture pays dividends over time."
+
+### Insight #7: Dead Code Isn't Free
+> "The system accumulated dead code: features started but not finished (data structures initialized but never populated). It was tempting to 'keep it just in case.' Removing it made the system clearer and removed cognitive load. The lesson: Dead code is mental tax—remove it ruthlessly."
+
 ---
 
 ## 🎓 What This Demonstrates
@@ -145,7 +180,9 @@ Memory Per 100 Queries  ~50MB      ✅ Efficient
 ### Technical Skills
 - **Full-stack AI engineering**: Data → Retrieval → Generation → Evaluation
 - **Production thinking**: Monitoring, testing, observability, error handling
-- **System design**: Composable architecture, multiple retrieval strategies
+- **System design**: Modular architecture with 8 dedicated modules, clear separation of concerns
+- **Code quality**: Abstract base classes, dataclasses, type safety, dead code elimination
+- **Architectural refactoring**: Transformed monolithic code into maintainable modular structure
 - **Advanced NLP**: Chunking, tokenization, semantic search, multi-hop reasoning
 
 ### Engineering Judgment

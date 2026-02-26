@@ -13,14 +13,20 @@
 cd /Users/haint/Desktop/Repository/generative-ai-learning/rag-chromadb
 source venv/bin/activate
 
-# 2. Start the system
-python rag-chromadb.py
+# 2. Install dependencies (first time only)
+pip install -r requirements.txt
 
-# 3. Load a source
-load Cristiano Ronaldo
+# 3. Start the system
+python -m src.cli
 
-# 4. Ask a question
-What are his major achievements?
+# 4. Load a source
+> load Cristiano Ronaldo
+
+# 5. Ask a question
+> query What are his major achievements?
+
+# 6. Advanced: Try multi-hop reasoning for complex queries
+> multihop How did Ronaldo's career trajectory compare to other top players?
 ```
 
 
@@ -77,12 +83,12 @@ Quality indicators throughout:
 
 ### PHASE 2: Advanced Capabilities (✅ Complete)
 
-#### 1. **Query Expansion & Rewriting** 🔄
-Improved retrieval coverage:
+#### 1. **Query Expansion Command** 🔄
+Explore retrieval coverage with variations:
+- Run with: `expand <query>`
 - Auto-generates 4 query variations
-- Different angles on same question
-- Combined results across variations
-- Stored in `query_expansions.json`
+- Shows different angles on same question
+- Returns combined results with metrics
 
 #### 2. **Confidence Thresholding** 🎚️
 Intelligent fallback strategies:
@@ -91,23 +97,24 @@ Intelligent fallback strategies:
 - Multi-source aggregation
 - Confidence-scored answers
 
-#### 3. **Multi-hop Reasoning** 🔗
+#### 3. **Multi-hop Reasoning Command** 🔗
 Complex question decomposition:
-- 3-step reasoning process
+- Run with: `multihop <complex_query>`
+- 3-step decomposition process
 - Breaks complex queries into sub-questions
 - Synthesizes comprehensive answer
-- Tracked in `multihop_results.json`
 
 #### 4. **Adversarial Testing Suite** 🧪
 Robustness validation with 8 edge cases:
-- Ambiguous queries
-- Out-of-scope questions
-- Contradictory statements
-- Special characters/encodings
-- Very short/long queries
-- Multiple topics
-- Factual accuracy
-- Results in `adversarial_test_results.json`
+- Run with: `test`
+- Tests ambiguous queries
+- Tests out-of-scope questions
+- Tests contradictory statements
+- Tests special characters/encodings
+- Tests very short/long queries
+- Tests multiple topics
+- Tests factual accuracy
+- Results saved in `adversarial_test_results.json`
 
 ---
 
@@ -140,6 +147,51 @@ Real-time token streaming for better UX:
 ---
 
 ## 🏗️ ARCHITECTURE
+
+### Modular File Structure
+
+**Clean separation of concerns with dedicated modules:**
+
+```
+src/
+├── cli/                          # ✨ Interactive command-line interface
+│   └── __init__.py              # InteractiveRAG class with 12+ commands
+├── core/                         # 🧠 Main orchestrator
+│   └── __init__.py              # EnhancedRAGSystem coordinator
+├── retrieval/                    # 🔍 Search & data loading
+│   ├── base.py                  # Abstract base classes
+│   ├── hybrid_search.py          # Semantic + BM25 hybrid search
+│   ├── chunker.py               # Adaptive content-aware chunking
+│   ├── cache.py                 # LRU embedding cache (50% speedup)
+│   ├── loader.py                # Multi-source data loading
+│   └── __init__.py              # Unified retrieval imports
+├── reasoning/                    # 🧩 Advanced query processing
+│   ├── query_expander.py         # 4-way query variation generation
+│   ├── multi_hop_reasoner.py     # 3-step decomposition & synthesis
+│   ├── adversarial_suite.py      # 8-case robustness testing
+│   └── __init__.py              # Reasoning module imports
+├── evaluation/                   # ⭐ Quality metrics & verification
+│   ├── base.py                  # Abstract Evaluator class
+│   ├── ragas_evaluator.py        # RAGAS metrics (context, answer, faithfulness)
+│   ├── fact_checker.py           # Automatic fact verification
+│   └── __init__.py              # Evaluation module imports
+├── generation/                   # 🤖 LLM-based answer generation
+│   └── __init__.py              # AnswerGenerator class
+├── models/                       # 📊 Data structures
+│   ├── data_models.py           # 12+ dataclasses (type-safe)
+│   ├── config.py                # Configuration & settings
+│   └── __init__.py              # Model exports
+├── persistence/                  # 💾 Storage layer
+│   └── __init__.py              # JSON persistence utilities
+└── __init__.py                  # Package exports
+```
+
+**Why Modular Architecture?**
+- ✅ **Maintainability**: Each component has single responsibility
+- ✅ **Testability**: Isolated modules easy to unit test
+- ✅ **Scalability**: Easy to swap implementations (e.g., different embeddings)
+- ✅ **Clarity**: Clear dependencies and data flow
+- ✅ **Production-ready**: Professional code organization
 
 ### Complete Pipeline
 
@@ -226,8 +278,6 @@ User Query
 │ │ Conversation Memory & Observability                │ │
 │ │ ├─ conversation_history.json                       │ │
 │ │ ├─ evaluation_metrics.json                         │ │
-│ │ ├─ query_expansions.json                           │ │
-│ │ ├─ multihop_results.json                           │ │
 │ │ └─ adversarial_test_results.json                   │ │
 │ └─────────────────────────────────────────────────────┘ │
 │                         ↓                                │

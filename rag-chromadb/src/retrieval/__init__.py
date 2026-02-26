@@ -1,31 +1,16 @@
-"""Retrieval layer - abstract base classes and interfaces"""
-from abc import ABC, abstractmethod
-from typing import List
-from src.models import RetrievedDocument
+"""Retrieval layer - abstract base classes and concrete implementations"""
+from src.retrieval.base import Retriever, DocumentLoader, Chunker
+from src.retrieval.hybrid_search import HybridSearchEngine
+from src.retrieval.cache import EmbeddingCache
+from src.retrieval.chunker import AdaptiveChunker
+from src.retrieval.loader import MultiSourceDataLoader
 
-
-class Retriever(ABC):
-    """Abstract base retriever interface"""
-
-    @abstractmethod
-    def retrieve(self, query: str, top_k: int = 3) -> List[RetrievedDocument]:
-        """Retrieve documents matching query"""
-        pass
-
-
-class DocumentLoader(ABC):
-    """Abstract document loader interface"""
-
-    @abstractmethod
-    def load(self, source: str) -> str:
-        """Load content from source"""
-        pass
-
-
-class Chunker(ABC):
-    """Abstract text chunker interface"""
-
-    @abstractmethod
-    def chunk(self, text: str) -> List[str]:
-        """Split text into chunks"""
-        pass
+__all__ = [
+    "Retriever",
+    "DocumentLoader",
+    "Chunker",
+    "HybridSearchEngine",
+    "EmbeddingCache",
+    "AdaptiveChunker",
+    "MultiSourceDataLoader",
+]
