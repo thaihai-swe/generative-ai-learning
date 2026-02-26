@@ -1024,6 +1024,41 @@ Then show complete source attribution and conversation context
 
 ---
 
+## 📊 Layer Organization
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                      CLI / API Layer                     │
+│                    (cli/interactive.py)                  │
+└─────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────┐
+│                   Core Pipeline Layer                    │
+│                    (core/pipeline.py)                    │
+│          Orchestrates retrieval, generation, eval       │
+└─────────────────────────────────────────────────────────┘
+       ↓                  ↓                  ↓
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│ Retrieval    │  │ Generation   │  │ Evaluation   │
+│ Layer        │  │ Layer        │  │ Layer        │
+├──────────────┤  ├──────────────┤  ├──────────────┤
+│ • Search     │  │ • LLM Gen    │  │ • RAGAS      │
+│ • Loader     │  │ • Streaming  │  │ • Fact Check │
+│ • Chunker    │  │              │  │ • Metrics    │
+│ • Cache      │  │              │  │              │
+└──────────────┘  └──────────────┘  └──────────────┘
+       ↓                  ↓                  ↓
+┌──────────────────────────────────────────────────────┐
+│         Advanced Reasoning Layer (Optional)          │
+│    • Query Expansion • Multi-hop • Adversarial       │
+└──────────────────────────────────────────────────────┘
+       ↓
+┌──────────────────────────────────────────────────────┐
+│              Persistence & Storage Layer              │
+│         (JSON, DB, or custom implementations)        │
+└──────────────────────────────────────────────────────┘
+```
+
 ## ✅ FINAL CHECKLIST & PRO TIPS
 
 ### Before Demo Checklist
@@ -1104,3 +1139,125 @@ rag-chromadb/
 ✅ **Observability** - Full conversation history + metrics tracking
 ✅ **Multi-Source** - Wikipedia, URLs, files with adaptive chunking
 ✅ **Production Ready** - Error handling, logging, state persistence
+
+
+
+## 🎯 Features
+
+
+### ✅ Phase 1 Features (Base RAG)
+- [x] **Hybrid Search Engine** - 70% semantic + 30% keyword search
+- [x] **Multi-Source Data Loading** - Wikipedia, URLs, PDFs, Local Files
+- [x] **Adaptive Chunking** - Content-aware chunk sizing
+- [x] **ChromaDB Vector Storage** - Persistent embedding storage
+- [x] **Conversation History** - Full chat history with timestamps
+- [x] **Source Citation** - References with source types
+- [x] **RAGAS Evaluation** - Context Relevance, Answer Relevance, Faithfulness
+
+### ✅ Phase 2 Features (Advanced)
+- [x] **Query Expansion** - Generate 4 query variations for better retrieval
+- [x] **Multi-Hop Reasoning** - Break complex queries into 3 reasoning steps
+- [x] **Confidence Thresholding** - Skip retrieval if confidence < threshold
+- [x] **Adversarial Testing** - Test edge cases, ambiguous queries, conflicting info
+- [x] **Evaluation Metrics** - Track RAG quality throughout sessions
+
+### ✅ Phase 3 Features (Production-Ready)
+- [x] **Embedding Cache (LRU)** - O(1) lookup cache with 50% speed boost
+- [x] **Fact Checking** - Verify claims in answers against context
+- [x] **Streaming Responses** - Real-time token display (togglable)
+- [x] **Toggle Features** - Turn streaming and fact-checking on/off
+- [x] **Cache Statistics** - Monitor cache performance metrics
+
+---
+
+## 📋 Interactive Commands
+
+### Core Commands
+```
+load <source> [collection]      - Load Wikipedia, URL, or file
+query <question>                - Standard RAG query
+sources                         - Show all loaded sources
+history                         - Show conversation history
+metrics                         - Show RAGAS evaluation metrics
+clear                           - Clear conversation history
+save [filename]                 - Save conversation to JSON
+```
+
+### Advanced Commands (NEW)
+```
+expand <query>                  - Query expansion (4 variations)
+multihop <query>                - Multi-hop reasoning (3 steps)
+expansions                      - Show expansion history
+multihop-results                - Show reasoning results
+```
+
+### Settings & Tools (NEW)
+```
+streaming                       - Toggle streaming responses
+fact-check                      - Toggle fact-checking
+cache                           - Show cache statistics
+facts                           - Show fact-check results
+```
+
+---
+
+## 🏗️ Architecture Restored
+
+### Module Organization (19 Modules)
+```
+src/
+├── config.py                    - Configuration management
+├── cli/                         - Interactive interface ✅ ENHANCED
+│   └── __init__.py             - All advanced commands
+├── core/                        - Main orchestrator
+│   └── __init__.py             - Multi-hop + expansion support
+├── models/                      - Data structures
+├── utils/                       - Logging, validation
+├── retrieval/                   - Document retrieval
+│   ├── hybrid_search.py        - BM25 + semantic search
+│   ├── chunker.py              - Adaptive chunking
+│   ├── loader.py               - Multi-source loader
+│   └── cache.py                - LRU embedding cache
+├── generation/                  - LLM answer generation
+├── evaluation/                  - RAGAS metrics
+│   └── FactChecker             - Fact verification
+├── reasoning/                   - Advanced reasoning
+│   ├── QueryExpander           - Query variations
+│   └── MultiHopReasoner        - Multi-step reasoning
+└── persistence/                 - Data storage
+```
+
+## WHAT HAPPENS AFTER LOAD
+
+When you load something, the system:
+
+1. Fetches the content
+   └─ Wikipedia: Uses APIs
+   └─ URL: Uses web scraping
+   └─ File: Reads from disk
+   └─ PDF: Extracts text from pages
+
+2. Cleans the text
+   └─ Removes extra spaces
+   └─ Removes special formatting
+   └─ Normalizes structure
+
+3. Splits into chunks
+   └─ 800 characters per chunk
+   └─ Creates 15-50 chunks (depends on content size)
+   └─ Each chunk can be independently searched
+
+4. Creates embeddings
+   └─ Converts text to numbers
+   └─ Makes searchable by meaning
+   └─ Stored in local database
+
+5. Saves to ChromaDB
+   └─ Creates collection (e.g., "machine_learning")
+   └─ Tracks metadata (source, timestamp, etc.)
+   └─ Ready for queries!
+
+6. Shows success message
+   └─ ✅ Successfully loaded 18 chunks from Machine Learning
+   └─ Source type: WIKIPEDIA
+   └─ Collection: machine_learning
