@@ -150,6 +150,10 @@ class RAGSystem:
                     }]
                 )
 
+            # Build BM25 index for hybrid search
+            self.retriever.build_bm25_index(collection_name, chunks)
+            logger.info(f"✅ Built BM25 index for {collection_name}")
+
             self.collections[collection_name] = collection
             self.current_collection = collection
             self.loaded_sources[source] = source_type
@@ -202,9 +206,12 @@ class RAGSystem:
                 confidence_score = metrics.rag_score
 
             # 5. Fact-check (if enabled)
+            fact_results = None
             if self.config.evaluation.check_facts and docs:
                 context = "\n".join([doc.content for doc in docs])
                 fact_results = self.fact_checker.check_answer(answer, context)
+                self.last_fact_check_results = fact_results  # Store for CLI access
+                logger.info(f"✅ Fact-checked {len(fact_results)} claims")
 
             # 6. Store in history
             self.conversation_history.append({
@@ -222,7 +229,8 @@ class RAGSystem:
                 confidence_score=confidence_score,
                 source_types=list(set(doc.source_type for doc in docs)),
                 conversation_context=None,
-                execution_time_ms=execution_time
+                execution_time_ms=execution_time,
+                fact_check_results=fact_results
             )
 
             logger.info(f"✅ Query processed in {execution_time:.1f}ms")
@@ -240,35 +248,115 @@ class RAGSystem:
             )
 
     def _retrieve_documents(self, query: str) -> List[RetrievedDocument]:
-        """Retrieve relevant documents for query"""
+        """Retrieve relevant documents using hybrid search"""
         if not self.current_collection:
             logger.warning("⚠️ No collection loaded")
             return []
 
         try:
-            results = self.current_collection.query(
+            collection_name = None
+            for name, col in self.collections.items():
+                if col == self.current_collection:
+                    collection_name = name
+                    break
+
+            if not collection_name:
+                logger.warning("⚠️ Could not find collection name")
+                return []
+
+            # 1. Semantic search via ChromaDB
+            semantic_results = self.current_collection.query(
                 query_texts=[query],
                 n_results=self.config.search.max_results
             )
 
+            # Build semantic results tuples (content, distance)
+            semantic_docs = []
+            for i, doc in enumerate(semantic_results['documents'][0]):
+                distance = semantic_results['distances'][0][i] if semantic_results['distances'] else 1.0
+                # Convert distance to similarity score (lower distance = higher similarity)
+                similarity = max(0, 1 - (distance / 2))
+                semantic_docs.append((doc, similarity))
+
+            # 2. Keyword search via BM25
+            keyword_docs = self.retriever.keyword_search(
+                collection_name,
+                query,
+                top_k=self.config.search.max_results
+            )
+
+            # 3. Combine using hybrid search
+            if semantic_docs and keyword_docs:
+                combined = self.retriever._combine_results(semantic_docs, keyword_docs)
+                logger.info(f"🔍 Hybrid search: {len(semantic_docs)} semantic + {len(keyword_docs)} keyword → {len(combined)} combined")
+            elif semantic_docs:
+                combined = [(doc, score) for doc, score in semantic_docs]
+                logger.info(f"🔍 Semantic-only search: {len(semantic_docs)} results")
+            elif keyword_docs:
+                combined = [(doc, score) for doc, score in keyword_docs]
+                logger.info(f"🔍 Keyword-only search: {len(keyword_docs)} results")
+            else:
+                logger.warning("⚠️ No results from either search method")
+                return []
+
+            # 4. Convert to RetrievedDocument objects
             documents = []
-            for i, doc in enumerate(results['documents'][0]):
-                source_type = results['metadatas'][0][i].get('source_type', 'collection')
+            for content, score in combined[:self.config.search.max_results]:
+                # Find metadata from original semantic results
+                idx = -1
+                for i, doc in enumerate(semantic_results['documents'][0]):
+                    if doc == content:
+                        idx = i
+                        break
+
+                if idx >= 0:
+                    source_type = semantic_results['metadatas'][0][idx].get('source_type', 'unknown')
+                    source = semantic_results['metadatas'][0][idx].get('source', 'unknown')
+                    index = semantic_results['metadatas'][0][idx].get('index', idx)
+                else:
+                    source_type = 'unknown'
+                    source = 'unknown'
+                    index = len(documents)
+
                 retrieved_doc = RetrievedDocument(
-                    content=doc,
-                    source=results['metadatas'][0][i].get('source', 'unknown'),
+                    content=content,
+                    source=source,
                     source_type=source_type,
-                    index=results['metadatas'][0][i].get('index', i),
-                    distance=results['distances'][0][i] if results['distances'] else None
+                    index=index,
+                    distance=1.0 - score  # Convert score back to distance
                 )
                 documents.append(retrieved_doc)
 
-            logger.info(f"✅ Retrieved {len(documents)} documents")
+            logger.info(f"✅ Retrieved {len(documents)} documents via hybrid search")
             return documents
 
         except Exception as e:
-            logger.error(f"❌ Retrieval failed: {e}")
-            return []
+            logger.error(f"❌ Hybrid retrieval failed: {e}, falling back to semantic only")
+            # Fallback to semantic-only search
+            try:
+                results = self.current_collection.query(
+                    query_texts=[query],
+                    n_results=self.config.search.max_results
+                )
+
+                documents = []
+                for i, doc in enumerate(results['documents'][0]):
+                    source_type = results['metadatas'][0][i].get('source_type', 'collection')
+                    retrieved_doc = RetrievedDocument(
+                        content=doc,
+                        source=results['metadatas'][0][i].get('source', 'unknown'),
+                        source_type=source_type,
+                        index=results['metadatas'][0][i].get('index', i),
+                        distance=results['distances'][0][i] if results['distances'] else None
+                    )
+                    documents.append(retrieved_doc)
+
+                logger.info(f"✅ Retrieved {len(documents)} documents (fallback)")
+                return documents
+
+            except Exception as fallback_error:
+                logger.error(f"❌ Fallback retrieval failed: {fallback_error}")
+                return []
 
     def _retrieve_relevant_chunks(self, query: str, n_results: int = 3) -> List[RetrievedDocument]:
         """Retrieve relevant chunks using semantic search"""

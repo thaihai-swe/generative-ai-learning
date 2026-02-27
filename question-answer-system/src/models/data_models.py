@@ -43,6 +43,7 @@ class RAGResponse:
     source_types: List[str]
     conversation_context: Optional[str] = None
     execution_time_ms: Optional[float] = None
+    fact_check_results: Optional[List['FactCheckResult']] = None
 
     def to_dict(self):
         return {
@@ -52,6 +53,7 @@ class RAGResponse:
             "source_types": self.source_types,
             "conversation_context": self.conversation_context,
             "execution_time_ms": self.execution_time_ms,
+            "fact_check_results": [r.to_dict() for r in self.fact_check_results] if self.fact_check_results else None,
         }
 
 
