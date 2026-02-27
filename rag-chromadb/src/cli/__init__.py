@@ -1,6 +1,6 @@
 """Command-line interface for RAG system"""
 from typing import Optional, List
-from src.core import EnhancedRAGSystem
+from src.core import RAGSystem
 from src.config import RAGConfig, get_config
 from src.utils import get_logger
 from datetime import datetime
@@ -12,8 +12,8 @@ logger = get_logger()
 class InteractiveRAG:
     """Interactive CLI interface for RAG system"""
 
-    def __init__(self, rag: Optional[EnhancedRAGSystem] = None):
-        self.rag = rag or EnhancedRAGSystem()
+    def __init__(self, rag: Optional[RAGSystem] = None):
+        self.rag = rag or RAGSystem()
         self.running = True
         self.enable_streaming = False
         self.enable_fact_checking = False

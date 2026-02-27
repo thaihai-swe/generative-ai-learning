@@ -6,7 +6,7 @@ from src.utils import get_logger
 from datetime import datetime
 
 if TYPE_CHECKING:
-    from src.core import EnhancedRAGSystem
+    from src.core import RAGSystem
 
 logger = get_logger()
 
@@ -81,7 +81,7 @@ class AdversarialTestSuite:
         return test_cases
 
     @staticmethod
-    def run_test_case(rag_system: "EnhancedRAGSystem", test_case: AdversarialTestCase) -> AdversarialTestCase:
+    def run_test_case(rag_system: "RAGSystem", test_case: AdversarialTestCase) -> AdversarialTestCase:
         """Run a single adversarial test"""
         logger.info(f"Running test {test_case.test_id}: {test_case.test_type}")
 
@@ -131,7 +131,7 @@ class AdversarialTestSuite:
             return test_case
 
     @staticmethod
-    def run_all_tests(rag_system: "EnhancedRAGSystem") -> List[AdversarialTestCase]:
+    def run_all_tests(rag_system: "RAGSystem") -> List[AdversarialTestCase]:
         """Run all adversarial tests"""
         test_cases = AdversarialTestSuite.generate_test_cases()
         results = []

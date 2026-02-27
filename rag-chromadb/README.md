@@ -157,7 +157,7 @@ src/
 ├── cli/                          # ✨ Interactive command-line interface
 │   └── __init__.py              # InteractiveRAG class with 12+ commands
 ├── core/                         # 🧠 Main orchestrator
-│   └── __init__.py              # EnhancedRAGSystem coordinator
+│   └── __init__.py              # RAGSystem coordinator
 ├── retrieval/                    # 🔍 Search & data loading
 │   ├── base.py                  # Abstract base classes
 │   ├── hybrid_search.py          # Semantic + BM25 hybrid search
@@ -221,7 +221,7 @@ User Query
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│          EnhancedRAGSystem (Main Coordinator)            │
+│          RAGSystem (Main Coordinator)            │
 ├─────────────────────────────────────────────────────────┤
 │                                                           │
 │ ┌─────────────────────────────────────────────────────┐ │

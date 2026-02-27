@@ -2189,7 +2189,7 @@ class RAGEvaluator:
 class QueryExpander:
     """Only handles query expansion"""
 
-class EnhancedRAGSystem:
+class RAGSystem:
     """Orchestrates all of the above"""
 ```
 
