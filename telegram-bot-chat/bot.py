@@ -6,7 +6,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 load_dotenv()
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("BOT_TOKEN") sk-or-v1-8baea779f58c2bef49a5013fba732edfd1fe5cdd226c8c99347099524a4297d61996
 OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
 OPEN_AI_MODEL = os.getenv("OPEN_AI_MODEL", "meta-llama-3.1-8b-instruct")
 OPEN_AI_API_BASE_URL = os.getenv("OPEN_AI_API_BASE_URL", "http://127.0.0.1:1234/v1")
